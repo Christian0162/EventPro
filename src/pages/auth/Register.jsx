@@ -17,8 +17,8 @@ export default function Register({ user }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
-    const [errorPassword, setErrorPassword] = useState(null);
-    const [errorEmail, setErrorEmail] = useState(null);
+    const [errorEmail, setErrorEmail] = useState('');
+
 
 
     const handleSubmit = async (e) => {
@@ -37,14 +37,10 @@ export default function Register({ user }) {
             }
         }
         catch (err) {
-
-            if (err.code === "auth/weak-password") {
-                setErrorPassword("Weak password the length must be up to 6");             
-            }
-
-            if(err.code === "auth/email-already-in-use") {
+            if (err.code === "auth/email-already-in-use") {
                 setErrorEmail("The email is already exist.");
             }
+            else { setErrorEmail('') }
         }
     }
 
@@ -56,7 +52,7 @@ export default function Register({ user }) {
 
     return (
         <>
-        <Title>Register</Title>
+            <Title>Register</Title>
             <div className="min-h-screen ">
                 <NavBar />
                 <div className="flex flex-col justify-center items-center">
@@ -66,7 +62,7 @@ export default function Register({ user }) {
                             providing supplies
                         </span>
 
-                        {/* cards */}
+                        {/* role cards */}
                         <div className="flex-col flex mt-5">
                             {item.map((item, index) => (
                                 <button className={`w-[30rem] mt-5 p-3 border hover:border-blue-500 ${role == item ? 'border-blue-600' : error ? 'border-red-600' : 'border-gray-600'}  rounded-md`}
@@ -74,7 +70,6 @@ export default function Register({ user }) {
                                     onClick={() => {
                                         setRole(item);
                                         setError(false)
-                                        console.log(error)
                                     }}
                                 >
                                     <div className="flex px-3 space-x-3">
@@ -142,12 +137,12 @@ export default function Register({ user }) {
                                 {/* password */}
                                 <div className="flex flex-col mt-5 mb-5">
                                     <label htmlFor="password" className="font-bold mb-3">Password</label>
-                                    <input type="password" name="password" id="password" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="******"
+                                    <input type="password" name="password" id="password" minLength={6} className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="******"
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                     />
-                                    <span className={`${errorPassword ? 'block text-red-500' : 'hidden'} mt-2`}>{errorPassword}</span>
+                                    {/* <span className={`${password.length < 6 ? 'block text-red-500' : 'hidden'} mt-2`}>Weak password. The length must atleast 6 characters</span> */}
                                 </div>
 
                                 <div className="space-x-1">

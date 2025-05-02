@@ -3,6 +3,7 @@ import NavBar from "../../components/NavBar";
 import { auth } from "../../firebase/firebase";
 import { Users, Star, CalendarDays, DollarSignIcon } from "lucide-react";
 import { Title } from "react-head";
+import DashboardCard from "../../components/DashboardCards";
 
 export default function Dashboard({ user, userData }) {
 
@@ -29,44 +30,19 @@ export default function Dashboard({ user, userData }) {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-5">
 
                         {/* total suppliers */}
-                        <div className="w-full h-full border-1 border-b-black rounded-md flex items-center justify-between p-10 px-[6rem]">
-                            <div className="flex flex-col space-y-1">
-                                <span className="block text-lg">Total Suppliers</span>
-                                <span className="block text-2xl font-bold">24</span>
-                                <span className="block text-blue-600">from last month</span>
-                            </div>
-                            <span><Users width={50} height={50} /></span>
-                        </div>
+                        <DashboardCard title={'Total Suppliers'} numbers={'24'} days={'from last month'} icon={<Users width={50} height={50} />} />
 
                         {/* upcoming events */}
-                        <div className="w-full h-full border-1 border-b-black rounded-md flex items-center justify-between p-10 px-[6rem]">
-                            <div className="flex flex-col space-y-1">
-                                <span className="block text-lg">Upcoming Events</span>
-                                <span className="block text-2xl font-bold">24</span>
-                                <span className="block text-blue-600">from last month</span>
-                            </div>
-                            <span><CalendarDays width={50} height={50} /></span>
-                        </div>
+                        <DashboardCard title={'Upcoming Events'} numbers={'24'} days={'from last month'} icon={<CalendarDays width={50} height={50} />} />
+
 
                         {/* rated suppliers */}
-                        <div className="w-full h-full border-1 border-b-black rounded-md flex items-center justify-between p-10 px-[6rem]">
-                            <div className="flex flex-col space-y-1">
-                                <span className="block text-lg">Rated Suppliers</span>
-                                <span className="block text-2xl font-bold">24</span>
-                                <span className="block text-blue-600">from last month</span>
-                            </div>
-                            <span><Star width={50} height={50} /></span>
-                        </div>
+                        <DashboardCard title={'Rated Suppliers'} numbers={'24'} days={'from last month'} icon={<Star width={50} height={50} />} />
+
 
                         {/* budget spent */}
-                        <div className="w-full h-full border-1 border-b-black rounded-md flex items-center justify-between p-10 px-[6rem]">
-                            <div className="flex flex-col space-y-1">
-                                <span className="block text-lg">Budget Spent</span>
-                                <span className="block text-2xl font-bold">24</span>
-                                <span className="block text-blue-600">from last month</span>
-                            </div>
-                            <span><DollarSignIcon width={50} height={50} /></span>
-                        </div>
+                        <DashboardCard title={'Budget Spent'} numbers={'24'} days={'from last month'} icon={<DollarSignIcon width={50} height={50} />} />
+
 
                     </div>
                 </div>

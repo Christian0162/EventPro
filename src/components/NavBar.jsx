@@ -16,7 +16,7 @@ export default function NavBar({ user }) {
                         <div className={`hidden ${user ? ' md:block' : 'hidden'}`}>
                             <div className="flex space-x-3 text-md">
                                 <Link to={'/dashboard'} className="text-gray-700 hover:text-black">Dashboard</Link>
-                                <Link to={'/'} className="text-gray-700 hover:text-black">Suppliers</Link>
+                                <Link to={'/suppliers'} className="text-gray-700 hover:text-black">Suppliers</Link>
                                 <Link to={'/events'} className="text-gray-700 hover:text-black">Events</Link>
                             </div>
                         </div>

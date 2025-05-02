@@ -12,7 +12,7 @@ import { db } from "./firebase/firebase";
 import Loading from "./components/Loading";
 import { HeadProvider } from "react-head";
 import Event from "./pages/events/Event";
-import { Title } from "react-head";
+import Supplier from "./pages/suppliers/Supplier";
 
 function App() {
     const [user, setUser] = useState(null);
@@ -51,8 +51,9 @@ function App() {
                         <Route path="/" element={<HomePage user={user} />}></Route>
                         <Route path="/register" element={<Register user={user} />}></Route>
                         <Route path="/login" element={<Login user={user} />}></Route>
-                        <Route path="/dashboard" element={user ? <Dashboard user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
+                        <Route path="/dashboard" element={user ? <Dashboard user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route> 
                         <Route path="/events" element={user ? <Event user={user} /> : <Navigate to={'/login'} />}></Route>
+                        <Route path="/suppliers" element={user ? <Supplier user={user} /> : <Navigate to={'/login'} />}></Route>
                     </Routes>
                     <ToastContainer />
                 </BrowserRouter>
