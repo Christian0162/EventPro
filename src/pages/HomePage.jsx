@@ -1,12 +1,18 @@
 import { Navigate } from "react-router-dom";
+import { Title } from "react-head";
+import NavBar from "../components/NavBar";
 
 export default function HomePage({ user }) {
+
     if (user) {
         return <Navigate to={'/dashboard'} />
     }
+
     return (
-        <>
-            <div>HELLO</div>
+        <>  
+            <div className="min-h-screen">
+                <NavBar user={user}/>
+            </div>
         </>
     );
 }

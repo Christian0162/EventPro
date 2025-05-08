@@ -11,13 +11,21 @@ export default function Login({ user }) {
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null)
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        setIsLoading(true);
-
-        await signInWithEmailAndPassword(auth, email, password);
+        try {
+            setIsLoading(true);
+            await signInWithEmailAndPassword(auth, email, password);
+        }
+        catch (error) {
+            console.log(error.code)
+            if (error.code === 'auth/invalid-credential') {
+                setError("invalid credential")
+            }
+        }
 
         setIsLoading(false);
     }
@@ -53,16 +61,18 @@ export default function Login({ user }) {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
+                                <span className={`mt-1 ml-1 ${error ? 'block text-red-500' : 'hidden'}`}>{error}</span>
                             </div>
 
                             {/* password */}
-                            <div className="flex flex-col mt-5 mb-5">
+                            <div className="flex flex-col mt-3">
                                 <label htmlFor="password" className="font-bold mb-3">Password</label>
                                 <input type="password" name="password" id="password" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="******"
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
+                                <span className={`mt-1 ml-1 ${error ? 'block text-red-500' : 'hidden'}`}>{error}</span>
                             </div>
 
                             <button className="bg-blue-600 w-full py-2 rounded-md text-white text-md mt-4">Log in</button>

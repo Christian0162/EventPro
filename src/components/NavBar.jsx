@@ -25,16 +25,16 @@ export default function NavBar({ user }) {
                         ?
                         <div className="hidden sm:block">
                             <div className="flex space-x-7 items-center">
-                                <Link to={'/'}><Heart /></Link>
+                                <Link to={'/favorites'}><Heart /></Link>
                                 <Link to={'/'}><MessageCircleMore /></Link>
-                                <Link to={'/'}><BellDot /></Link>
+                                <Link to={'/notification'}><BellDot /></Link>
                                 <div className="bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center"><User /></div>
                             </div>
                         </div>
                         :
                         <div className="space-x-8 text-md hidden sm:block">
-                            <Link to={'/'}>HOME</Link>
-                            <Link to={'/'}>ABOUT US</Link>
+                            <Link to={'/login'}>LOGIN</Link>
+                            <Link to={'/register'}>REGISTER</Link>
                             <Link to={'/'}>CONTACT</Link>
                         </div>
                     }

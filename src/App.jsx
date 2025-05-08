@@ -6,13 +6,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth } from "./firebase/firebase";
-import Dashboard from "./pages/auth/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import Loading from "./components/Loading";
 import { HeadProvider } from "react-head";
 import Event from "./pages/events/Event";
 import Supplier from "./pages/suppliers/Supplier";
+import Favorites from "./pages/favorites/Favorites";
+import Notification from "./pages/notifications/Notification";
+import CreateEvent from "./pages/events/CreateEvent";
+import Error404 from "./pages/Error404";
 
 function App() {
     const [user, setUser] = useState(null);
@@ -40,6 +44,7 @@ function App() {
     }, [])
 
     if (isLoading) {
+
         return <Loading />
     }
 
@@ -53,7 +58,11 @@ function App() {
                         <Route path="/login" element={<Login user={user} />}></Route>
                         <Route path="/dashboard" element={user ? <Dashboard user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route> 
                         <Route path="/events" element={user ? <Event user={user} /> : <Navigate to={'/login'} />}></Route>
+                        <Route path="/events/create" element={user ? <CreateEvent user={user} /> : <Navigate to={'/login'} />}></Route>
                         <Route path="/suppliers" element={user ? <Supplier user={user} /> : <Navigate to={'/login'} />}></Route>
+                        <Route path="/favorites" element={user ? <Favorites user={user} /> : <Navigate to={'/login'} />}></Route>
+                        <Route path="/notification" element={user ? <Notification user={user} /> : <Navigate to={'/login'} />}></Route>
+                        <Route path="*" element={<Error404 user={user} />}></Route>
                     </Routes>
                     <ToastContainer />
                 </BrowserRouter>

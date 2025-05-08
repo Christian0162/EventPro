@@ -63,7 +63,7 @@ export default function Register({ user }) {
                         </span>
 
                         {/* role cards */}
-                        <div className="flex-col flex mt-5">
+                        <div className="flex-col flex mt-5 mb-4">
                             {item.map((item, index) => (
                                 <button className={`w-[30rem] mt-5 p-3 border hover:border-blue-500 ${role == item ? 'border-blue-600' : error ? 'border-red-600' : 'border-gray-600'}  rounded-md`}
                                     key={index}
@@ -92,7 +92,7 @@ export default function Register({ user }) {
                             ))}
                             <span className={`mt-3 ${error ? 'block text-red-600' : 'hidden'}`}>You must to choose one to proceed</span>
                         </div>
-                        <PrimaryButton context={'Continue'} handleClick={error === null ? () => { setVisible(false); setError(true); } : () => setVisible(!visible)} />
+                        <PrimaryButton onClick={error === null ? () => { setVisible(false); setError(true); } : () => setVisible(!visible)}>Continue</PrimaryButton>
                     </div>
 
                     <div className={`mt-10 flex-col justify-center items-center flex ${visible ? 'block' : 'hidden'}`}>
@@ -145,12 +145,12 @@ export default function Register({ user }) {
                                     {/* <span className={`${password.length < 6 ? 'block text-red-500' : 'hidden'} mt-2`}>Weak password. The length must atleast 6 characters</span> */}
                                 </div>
 
-                                <div className="space-x-1">
+                                <div className="space-x-1 mb-4">
                                     <span className="text-gray-600">Account type: </span>
                                     <span>{role}</span>
                                     <button className="text-blue-600" onClick={() => setVisible(!visible)}>Change</button>
                                 </div>
-                                <PrimaryButton context={'Create an account'} />
+                                    <PrimaryButton>Create an account</PrimaryButton>
                             </div>
                         </form>
                     </div>

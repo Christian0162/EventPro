@@ -1,57 +1,31 @@
-import { Title } from "react-head";
 import NavBar from "../../components/NavBar";
-import { Search } from "lucide-react";
-import { useState } from "react";
-import Select from "react-select";
+import { Title } from "react-head";
 import Cards from "../../components/Cards";
 import { MapPin, DollarSignIcon, Clock } from "lucide-react";
 import PrimaryButton from "../../components/PrimaryButton";
 
-export default function Supplier({ user }) {
 
-    const [selected, setSelected] = useState(null);
-
-    console.log(selected)
+export default function Favorites({ user }) {
 
     const categories = [
-        { value: 'wedding', label: 'Wedding' },
-        { value: 'test', label: 'test' },
-    ];
+        { value: "testing", label: "testing" }
+    ]
+
+    console.log(categories)
     return (
         <>
-            <Title>Event</Title>
+            <Title>Favorites</Title>
             <div className="min-h-screen">
                 <NavBar user={user} />
-
                 <div className="p-10 px-[5rem]">
                     <div className="flex flex-col">
-                        <span className="text-3xl font-bold">Suppliers</span>
-                        <span className="mt-2 text-gray-600">Look suppliers for your events</span>
-                    </div>
-
-                    <div className="flex mt-3 gap-4">
-
-                        {/* search bar */}
-                        <div className="flex items-center w-1/4">
-                            <Search width={21} height={21} className="absolute ml-3 flex items" />
-                            <input type="search" className="w-full pl-10 px-5 py-[5px] ring-1 ring-gray-400 focus:ring-blue-600 focus:ring-2 outline-none rounded-sm" placeholder="Search suppliers" />
-                        </div>
-
-                        {/* category bar */}
-                        <div className="w-64">
-                            <Select
-                                value={selected}
-                                onChange={setSelected}
-                                options={categories}
-                                placeholder="Select a Category"
-                                isClearable
-                            />
-                        </div>
+                        <span className="text-3xl font-bold">Favorites</span>
+                        <span className="mt-2 text-gray-600">Look at your favorite suppliers</span>
                     </div>
 
                     <div className="grid grid-cols-4">
                         <Cards>
-                            <img src="img1.jpg" className="object-cover w-full h-[40%" alt="" />
+                            <img src="img1.jpg" className="object-cover w-full" alt="image" />
                             <div className="px-5 space-y-4 mt-3">
                                 <span className="block text-2xl font-bold">Floral Design Inc.</span>
                                 <div className="flex space-x-2 items-center">
@@ -74,7 +48,12 @@ export default function Supplier({ user }) {
                                         </span>
                                     </div>
                                 </div>
-                                <PrimaryButton>View Profile</PrimaryButton>
+                                <div className="flex gap-3">
+                                    <PrimaryButton>View Profile</PrimaryButton>
+                                    
+                                    {/* remove button */}
+                                    <button className="py-2 w-full bg-red-600 text-white rounded-md hover:bg-red-700 transition-all duration-200">Remove</button>
+                                </div>
                             </div>
                         </Cards>
                     </div>
