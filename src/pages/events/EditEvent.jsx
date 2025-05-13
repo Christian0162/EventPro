@@ -1,34 +1,39 @@
-import NavBar from "../../components/NavBar";
-import Select from "react-select";
-import { useState } from "react";
-import PrimaryButton from "../../components/PrimaryButton";
-import { Link, Navigate } from "react-router-dom";
-import { X } from "lucide-react";
-import { addDoc, collection } from "firebase/firestore";
+import NavBar from "../../components/NavBar"
+import { useState, useEffect } from "react"
+import { useParams } from "react-router-dom";
 import { db } from "../../firebase/firebase";
-import { auth } from "../../firebase/firebase";
-import Loading from "../../components/Loading";
+import { getDoc, doc, updateDoc } from "firebase/firestore";
 import AddressAutoComplete from "../../components/AddressAutoComplete";
+import Select from "react-select"
+import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import PrimaryButton from "../../components/PrimaryButton";
+import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 
-export default function CreateEvent({ user }) {
+export default function EditEvent({ user }) {
 
-    const [loading, setLoading] = useState(false)
-    const [tags, setTags] = useState([]);
-    const [categories, setCategories] = useState('');
-    const [event_status, setEvent_status] = useState('');
-    const [type, setType] = useState('');
-    const [event_name, setEvent_name] = useState('');
-    const [event_location, setEvent_location] = useState('');
-    const [event_date, setEvent_date] = useState([]);
-    const [event_budget, setEvent_budget] = useState('');
-    const [event_description, setEvent_description] = useState('');
-    const [month, setMonth] = useState('')
-    const [day, setDay] = useState('')
+    const navigate = useNavigate()
+    const { id } = useParams();
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [event_name, setEvent_name] = useState('')
+    const [event_location, setEvent_location] = useState('')
+    const [event_date, setEvent_date] = useState('')
     const [year, setYear] = useState('')
-    const [startTime, setStartTime] = useState('');
-    const [endTime, setEndTime] = useState('');
-    const [submitted, setSubmitted] = useState(false);
+    const [month, setMonth] = useState('')
+    const [days, setDays] = useState('')
+    const [startTime, setStartTime] = useState('')
+    const [endTime, setEndTime] = useState('')
+    const [event_status, setEvent_status] = useState('')
+    const [event_type, setEvent_type] = useState('')
+    const [event_description, setEvent_description] = useState('')
+    const [categories, setCategories] = useState('')
+    const [event_budget, setEvent_budget] = useState('')
+    const [tags, setTags] = useState([])
+
+    // console.log(new Date(`1970-01-01T${startTime}`).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit' ,hour12: true}))
+
+    console.log(event_status)
 
     const categoriesOptions = [
         { label: '123', value: '123' },
@@ -47,65 +52,6 @@ export default function CreateEvent({ user }) {
         { label: 'test', value: 'test' },
     ]
 
-
-    const handleDate = (e) => {
-        const dateString = e.target.value
-        const date = new Date(dateString)
-        setEvent_date(dateString)
-
-        const years = date.getFullYear();
-        const months = date.toLocaleDateString([], { month: "long" })
-        const days = date.toLocaleDateString([], { weekday: "long" })
-
-        setMonth(months)
-        setDay(days)
-        setYear(years)
-    }
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const user = auth.currentUser;
-        if (user) {
-            setLoading(true)
-
-            await addDoc(collection(db, "Events"), {
-                userUID: user.uid,
-                event_name: event_name,
-                event_location: event_location,
-                event_date: [day, month, year].join(", "),
-                event_time: [
-                    new Date(`1970-01-01T${startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
-                    new Date(`1970-01-01T${endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
-                ].join(" - "),
-                event_status: event_status,
-                event_type: type,
-                event_budget: event_budget,
-                event_description: event_description,
-                event_categories: tags,
-            })
-            Swal.fire({
-                icon: 'success',
-                title: 'Added',
-                text: `${event_name}'s data has been added`,
-                showConfirmButton: false,
-                timer: 1000,
-            })
-            setSubmitted(true)
-
-        }
-        setLoading(false)
-    }
-
-
-    if (submitted) {
-        return <Navigate to={'/events'} replace />
-    }
-
-    const removeTag = (index) => {
-        setTags(tags.filter((tag, i) => i !== index));
-    }
-
     const addTag = () => {
         if (categories.value.trim() && !tags.includes(categories.value.trim())) {
             setTags([...tags, categories.value])
@@ -113,20 +59,101 @@ export default function CreateEvent({ user }) {
         }
     }
 
+    const removeTag = (index) => {
+        setTags(tags.filter((tag, i) => i !== index))
+    }
+    useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                const docRef = await getDoc(doc(db, "Events", id));
 
-    if (loading) {
-        return <Loading />
+                const data = docRef.data()
+
+                if (docRef.exists()) {
+                    setSelectedEvent({ id: docRef.id, ...docRef.data() });
+                    setEvent_name(data.event_name)
+                    setEvent_location(data.event_location)
+                    // setEvent_date(data.event_date)
+                    setEvent_status(data.event_status)
+                    setEvent_type(data.event_type)
+                    setEvent_budget(data.event_budget)
+                    setEvent_description(data.event_description)
+                    setTags(data.event_categories)
+
+                }
+
+            } catch (err) {
+                console.error("Error fetching document:", err);
+            } finally {
+                // setLoading(false);
+            }
+        };
+
+        fetchEvent();
+    }, [id]);
+
+
+    const handleDate = (e) => {
+        const value = e.target.value;
+        const date = new Date(value)
+
+        setEvent_date(value)
+
+        const year = date.getFullYear();
+        const month = date.toLocaleDateString([], { month: 'long' })
+        const days = date.toLocaleDateString([], { days: 'long' })
+
+        setYear(year)
+        setMonth(month)
+        setDays(days)
     }
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            updateDoc(doc(db, 'Events', id), {
+                event_name: event_name,
+                event_location: event_location,
+                event_date: [year, month, days].join(", "),
+                event_time: [
+                    new Date(`1970-01-01T${startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
+                    new Date(`1970-01-01T${endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+
+                ].join(" - "),
+                event_status: event_status,
+                event_type: event_type,
+                event_budget: event_budget,
+                event_description: event_description,
+                event_categories: tags,
+            })
+            Swal.fire({
+                icon: 'success',
+                title: 'Update',
+                text: `${event_name} has been updated successfully.`,
+                showConfirmButton: false,
+                timer: 1000
+            })
+            navigate("/events")
+        }
+        catch (error) {
+            console.log(error)
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to update',
+                confirmButtonText: 'Continue',
+                timer: 1000
+            })
+        }
+    }
+
+    console.log(selectedEvent)
     return (
         <>
             <div className="min-h-screen">
                 <NavBar user={user} />
+                {/* <div>{id}</div> */}
                 <div className="p-10 px-[5rem]">
-                    <div className="flex flex-col">
-                        <span className="text-3xl font-bold">Create New Event</span>
-                        <span className="mt-2 text-gray-600">Add the details for your new event</span>
-                    </div>
                     <form onSubmit={handleSubmit} className="w-full h-full mt-5 space-y-5">
 
                         {/* event name and location */}
@@ -144,7 +171,7 @@ export default function CreateEvent({ user }) {
                             {/* location */}
                             <div className="flex flex-col w-full">
                                 <label htmlFor="location">Location</label>
-                                <AddressAutoComplete setEvent_location={setEvent_location} />
+                                <AddressAutoComplete setEvent_location={setEvent_location} defaultLocation={event_location}/>
                             </div>
                         </div>
 
@@ -185,14 +212,13 @@ export default function CreateEvent({ user }) {
 
                             {/* status */}
                             <div className="flex flex-col w-full">
-                                <label htmlFor="time">Status</label>
+                                <label htmlFor="status">Status</label>
                                 <Select
                                     name="event_status"
                                     value={event_status}
                                     onChange={setEvent_status}
                                     options={statusOptions}
-                                    placeholder="Upcoming"
-                                    isClearable
+                                    placeholder={event_status.length > 0 ? event_status : "Upcoming"}
                                     className="mt-2"
                                 />
                             </div>
@@ -204,10 +230,9 @@ export default function CreateEvent({ user }) {
                             <Select
                                 name="event_type"
                                 options={typeOptions}
-                                value={type}
-                                onChange={setType}
-                                placeholder="Corporate"
-                                isClearable
+                                value={event_type}
+                                onChange={setEvent_type}
+                                placeholder={event_type.length > 0 ? event_type : "test"}
                             />
                         </div>
 
@@ -250,7 +275,7 @@ export default function CreateEvent({ user }) {
                                         value={categories}
                                         onChange={setCategories}
                                         placeholder="Categories"
-                                        isClearable
+                                        
                                     />
                                     <button type="button" className="py-1 px-2 border-1 border-blue-500 rounded-sm" onClick={addTag}>Add more</button>
                                 </div>
@@ -265,7 +290,6 @@ export default function CreateEvent({ user }) {
                             </Link>
                         </div>
                     </form>
-
                 </div>
             </div >
         </>
