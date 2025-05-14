@@ -17,6 +17,7 @@ import Favorites from "./pages/favorites/Favorites";
 import Notification from "./pages/notifications/Notification";
 import CreateEvent from "./pages/events/CreateEvent";
 import Error404 from "./pages/Error404";
+import EditEvent from "./pages/events/EditEvent";
 
 function App() {
     const [user, setUser] = useState(null);
@@ -59,6 +60,7 @@ function App() {
                         <Route path="/dashboard" element={user ? <Dashboard user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route> 
                         <Route path="/events" element={user ? <Event user={user} /> : <Navigate to={'/login'} />}></Route>
                         <Route path="/events/create" element={user ? <CreateEvent user={user} /> : <Navigate to={'/login'} />}></Route>
+                        <Route path="/events/edit/:id" element={user ? <EditEvent user={user} /> : <Navigate to={'/login'} />}></Route>
                         <Route path="/suppliers" element={user ? <Supplier user={user} /> : <Navigate to={'/login'} />}></Route>
                         <Route path="/favorites" element={user ? <Favorites user={user} /> : <Navigate to={'/login'} />}></Route>
                         <Route path="/notification" element={user ? <Notification user={user} /> : <Navigate to={'/login'} />}></Route>
