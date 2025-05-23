@@ -3,10 +3,10 @@ import { useState } from "react";
 import { Calendar, Package } from "lucide-react";
 import PrimaryButton from "../../components/PrimaryButton";
 import { auth, db } from "../../firebase/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore";
 import { Navigate } from "react-router-dom";
 import { Title } from "react-head";
+import useAuth from "../../hooks/useAuth";
 
 export default function Register({ user }) {
 
@@ -18,13 +18,17 @@ export default function Register({ user }) {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [errorEmail, setErrorEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false)
 
-
+    const { register } = useAuth()
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            setIsLoading(true)
+
+            register(auth, email, password)
+
             const user = auth.currentUser;
             setError(null);
             if (user) {
@@ -33,10 +37,12 @@ export default function Register({ user }) {
                     last_name: lastName,
                     email: email,
                     role: role,
+                    isApproved: false,
                 })
             }
         }
         catch (err) {
+            setIsLoading(false)
             if (err.code === "auth/email-already-in-use") {
                 setErrorEmail("The email is already exist.");
             }
@@ -92,7 +98,7 @@ export default function Register({ user }) {
                             ))}
                             <span className={`mt-3 ${error ? 'block text-red-600' : 'hidden'}`}>You must to choose one to proceed</span>
                         </div>
-                        <PrimaryButton onClick={error === null ? () => { setVisible(false); setError(true); } : () => setVisible(!visible)}>Continue</PrimaryButton>
+                        <PrimaryButton onClick={!role ? () => setError(true) : () =>{ setVisible(true); setError(false) }}>Continue</PrimaryButton>
                     </div>
 
                     <div className={`mt-10 flex-col justify-center items-center flex ${visible ? 'block' : 'hidden'}`}>
@@ -148,9 +154,9 @@ export default function Register({ user }) {
                                 <div className="space-x-1 mb-4">
                                     <span className="text-gray-600">Account type: </span>
                                     <span>{role}</span>
-                                    <button className="text-blue-600" onClick={() => setVisible(!visible)}>Change</button>
+                                    <button type="button" className="text-blue-600" onClick={() => setVisible(!visible)}>Change</button>
                                 </div>
-                                    <PrimaryButton>Create an account</PrimaryButton>
+                                <PrimaryButton>{isLoading ? "Loading.." : "Create an account"}</PrimaryButton>
                             </div>
                         </form>
                     </div>

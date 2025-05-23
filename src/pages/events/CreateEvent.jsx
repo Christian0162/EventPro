@@ -70,7 +70,7 @@ export default function CreateEvent({ user }) {
             setLoading(true)
 
             await addDoc(collection(db, "Events"), {
-                userUID: user.uid,
+                uid: user.uid,
                 event_name: event_name,
                 event_location: event_location,
                 event_date: [day, month, year].join(", "),

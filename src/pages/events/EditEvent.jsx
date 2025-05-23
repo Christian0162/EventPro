@@ -33,7 +33,7 @@ export default function EditEvent({ user }) {
 
     // console.log(new Date(`1970-01-01T${startTime}`).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit' ,hour12: true}))
 
-    console.log(event_status)
+    console.log(id)
 
     const categoriesOptions = [
         { label: '123', value: '123' },

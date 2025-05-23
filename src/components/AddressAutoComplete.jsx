@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
 
-export default function AddressAutocomplete({ setEvent_location, defaultLocation = "" }) {
+export default function AddressAutocomplete({ setEvent_location, defaultLocation = "", disabled }) {
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState([])
 
@@ -17,10 +17,11 @@ export default function AddressAutocomplete({ setEvent_location, defaultLocation
 
 
         if (value.length < 2) {
+            setSuggestions([])
             return;
         }
 
-        const response = await fetch(`https://photon.komoot.io/api/?q=${value}`)
+        const response = await fetch(`https://photon.komoot.io/api/?q=${value}&bbox=116.87,4.59,126.61,21.12`)
         const data = await response.json();
         setSuggestions(data.features);
     }
@@ -41,7 +42,7 @@ export default function AddressAutocomplete({ setEvent_location, defaultLocation
         <>
             <OutsideClickHandler onOutsideClick={() => setSuggestions([])}>
                 <div>
-                    <input type="text" className="mt-2 focus:ring-2 focus:outline-none px-2 focus:ring-blue-500 ring-1 rounded-sm w-full h-8 ring-black"
+                    <input type="text" disabled={disabled} className="mt-2 focus:ring-2 focus:outline-none px-2 focus:ring-blue-500 ring-1 rounded-sm w-full h-8 ring-black"
                         value={query}
                         required
                         placeholder="Type an address"

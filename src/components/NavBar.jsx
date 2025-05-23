@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
-import { AlignJustify, Heart, MessageCircleMore, BellDot, User } from "lucide-react";
+import { Heart, MessageCircleMore, BellDot, User } from "lucide-react";
+import UserDropdown from "./UserDropdown";
+import DropDown from "./DropDown";
+import Swal from "sweetalert2";
 
-export default function NavBar({ user }) {
+export default function NavBar({ user, userData }) {
     return (
         <>
             <nav className="font-sans font-bold">
@@ -18,28 +21,33 @@ export default function NavBar({ user }) {
                                 <Link to={'/dashboard'} className="text-gray-700 hover:text-black">Dashboard</Link>
                                 <Link to={'/suppliers'} className="text-gray-700 hover:text-black">Suppliers</Link>
                                 <Link to={'/events'} className="text-gray-700 hover:text-black">Events</Link>
+                                {
+                                    userData?.role == "Supplier" ?
+                                        <Link to={'/shop'} className="text-gray-700 hover:text-black">Shop</Link>
+                                        :
+                                        ""
+                                }
                             </div>
                         </div>
                     </div>
                     {user
                         ?
-                        <div className="hidden sm:block">
-                            <div className="flex space-x-7 items-center">
-                                <Link to={'/favorites'}><Heart /></Link>
-                                <Link to={'/'}><MessageCircleMore /></Link>
-                                <Link to={'/notification'}><BellDot /></Link>
-                                <div className="bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center"><User /></div>
-                            </div>
+                        <div className="hidden sm:flex space-x-6 items-center">
+                            <Link to="/favorites" className="hover:text-blue-600"><Heart size={20} /></Link>
+                            <Link to="/chat" className="hover:text-blue-600"><MessageCircleMore size={20} /></Link>
+                            <Link to="/notification" className="hover:text-blue-600"><BellDot size={20} /></Link>
+                            <UserDropdown />
                         </div>
+
                         :
-                        <div className="space-x-8 text-md hidden sm:block">
+                        <div className="space-x-8 text-sm hidden sm:block">
                             <Link to={'/login'}>LOGIN</Link>
                             <Link to={'/register'}>REGISTER</Link>
                             <Link to={'/'}>CONTACT</Link>
                         </div>
                     }
 
-                    <AlignJustify className="block sm:hidden" />
+                    <DropDown />
                 </div>
             </nav>
         </>
