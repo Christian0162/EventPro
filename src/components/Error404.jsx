@@ -1,13 +1,13 @@
-import NavBar from "../components/NavBar"
+import NavBar from "./NavBar"
 import { Link } from "react-router-dom"
 
-export default function Error404({ user }) {
+export default function Error404({ user, userData }) {
     return (
         <>
             <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
 
                 <div className="absolute top-0 w-full bg-white">
-                    <NavBar user={user} />
+                    <NavBar user={user} userData={userData}/>
                 </div>
 
                 <div className="flex flex-col items-center justify-center">

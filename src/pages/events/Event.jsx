@@ -12,7 +12,7 @@ import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import Swal from "sweetalert2";
 
-export default function Event({ user }) {
+export default function Event({ user, userData }) {
 
     const [userEvents, setUserEvents] = useState([]);
     const [loading, setLoading] = useState(true)
@@ -25,7 +25,7 @@ export default function Event({ user }) {
                 const filteredData = data.filter(event => event.userUID === auth.currentUser.uid)
                 setUserEvents(filteredData)
                 setLoading(true)
-                
+
             }
             catch (error) {
                 console.log(error)
@@ -49,13 +49,11 @@ export default function Event({ user }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 deleteDoc(doc(db, "Events", id))
-
                 setUserEvents(prev => prev.filter(event => event.id !== id));
-
                 Swal.fire({
                     icon: 'success',
                     title: 'Deleted!',
-                    text: `${userEvents?.event_name} has been deleted.`,
+                    text: `${userEvents.event_name} has been deleted.`,
                     showConfirmButton: false,
                     timer: 1000,
                 })
@@ -67,7 +65,7 @@ export default function Event({ user }) {
         <>
             <Title>Event</Title>
             <div className="min-h-screen">
-                <NavBar user={user} />
+                <NavBar user={user} userData={userData} />
 
                 <div className="p-10 px-[5rem]">
                     <div className="flex justify-between md:items-center lg:items-center flex-col lg:flex-row md:flex-row">
@@ -111,7 +109,7 @@ export default function Event({ user }) {
                                                     <div className="flex justify-end">
                                                         <button onClick={() => handleDelete(events.id)} className="self-end"><Trash width={24} height={24} strokeWidth={2} /></button>
                                                     </div>
-                                                    
+
                                                     <div className="flex justify-between items-center mb-5 mt-3">
                                                         <span className="block text-4xl">{events.event_name.length > 10 ? events.event_name.slice(0, 10) + ".." : events.event_name}</span>
                                                         <span className={`${events.event_status.value === "upcoming" ? "bg-purple-600" : events.event_status.value === "planning" ? "bg-sky-500" : "bg-green-500"} rounded-xl py-1 px-5 text-white`}>{events.event_status.value}</span>

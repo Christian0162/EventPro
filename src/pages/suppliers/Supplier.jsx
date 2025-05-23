@@ -7,7 +7,7 @@ import Cards from "../../components/Cards";
 import { MapPin, DollarSignIcon, Clock } from "lucide-react";
 import PrimaryButton from "../../components/PrimaryButton";
 
-export default function Supplier({ user }) {
+export default function Supplier({ user, userData }) {
 
     const [selected, setSelected] = useState(null);
 
@@ -19,9 +19,9 @@ export default function Supplier({ user }) {
     ];
     return (
         <>
-            <Title>Event</Title>
+            <Title>Suppliers</Title>
             <div className="min-h-screen">
-                <NavBar user={user} />
+                <NavBar user={user} userData={userData}/>
 
                 <div className="p-10 px-[5rem]">
                     <div className="flex flex-col">
