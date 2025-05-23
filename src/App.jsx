@@ -1,7 +1,7 @@
 import { ToastContainer } from "react-toastify";
-import Login from "./pages/auth/login";
+import Login from "./pages/auth/Login"
 import HomePage from "./pages/HomePage";
-import Register from "./pages/auth/register";
+import Register from "./pages/auth/Register";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
