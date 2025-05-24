@@ -61,6 +61,8 @@ export default function Register({ user }) {
             <Title>Register</Title>
             <div className="min-h-screen ">
                 <NavBar />
+
+                {/* 1st process */}
                 <div className="flex flex-col justify-center items-center">
                     <div className={`mt-10 flex-col justify-center items-center flex ${visible ? 'hidden' : 'block'}`}>
                         <span className="font-bold text-3xl text-center block">Create an Account</span>
@@ -71,7 +73,7 @@ export default function Register({ user }) {
                         {/* role cards */}
                         <div className="flex-col flex mt-5 mb-4">
                             {item.map((item, index) => (
-                                <button className={`w-[30rem] mt-5 p-3 border hover:border-blue-500 ${role == item ? 'border-blue-600' : error ? 'border-red-600' : 'border-gray-600'}  rounded-md`}
+                                <button className={`w-[30rem] mt-5 p-3 transition-all border-2 hover:border-blue-500 ${role == item ? 'border-blue-600' : error ? 'border-red-600' : 'border-gray-600'}  rounded-md`}
                                     key={index}
                                     onClick={() => {
                                         setRole(item);
@@ -100,7 +102,8 @@ export default function Register({ user }) {
                         </div>
                         <PrimaryButton onClick={!role ? () => setError(true) : () =>{ setVisible(true); setError(false) }}>Continue</PrimaryButton>
                     </div>
-
+                        
+                    {/* 2nd process */}
                     <div className={`mt-10 flex-col justify-center items-center flex ${visible ? 'block' : 'hidden'}`}>
                         <span className="font-bold text-3xl text-center block">Create an Account</span>
                         <span className="block text-gray-600 text-center mt-3">Join our platform and start mananging event or
@@ -113,7 +116,7 @@ export default function Register({ user }) {
                                     {/* first name */}
                                     <div className="flex flex-col">
                                         <label htmlFor="firstName" className="font-bold mb-3">Full Name</label>
-                                        <input type="text" name="firstName" id="firstName" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="John"
+                                        <input type="text" name="firstName" id="firstName" className="py-2 border border-gray-600 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="John"
                                             required
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)} />
@@ -122,7 +125,7 @@ export default function Register({ user }) {
                                     {/* last name */}
                                     <div className="flex flex-col">
                                         <label htmlFor="lastName" className="font-bold mb-3">Full Name</label>
-                                        <input type="text" name="lastName" id="lastName" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="Doe"
+                                        <input type="text" name="lastName" id="lastName" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="Doe"
                                             required
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)} />
@@ -132,7 +135,7 @@ export default function Register({ user }) {
                                 {/* email */}
                                 <div className="flex flex-col mt-5 mb-5">
                                     <label htmlFor="email" className="font-bold mb-3">Email</label>
-                                    <input type="email" name="email" id="email" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="email@example.com"
+                                    <input type="email" name="email" id="email" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="email@example.com"
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
@@ -143,7 +146,7 @@ export default function Register({ user }) {
                                 {/* password */}
                                 <div className="flex flex-col mt-5 mb-5">
                                     <label htmlFor="password" className="font-bold mb-3">Password</label>
-                                    <input type="password" name="password" id="password" minLength={6} className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="******"
+                                    <input type="password" name="password" id="password" minLength={6} className="py-2 border border-gray-500 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="******"
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}

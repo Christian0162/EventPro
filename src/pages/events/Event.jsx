@@ -1,30 +1,38 @@
 import { Link } from "react-router-dom";
-import NavBar from "../../components/NavBar";
 import { Navigation } from "swiper/modules";
 import { Title } from "react-head";
-import { CalendarDays, MapPin, CircleDollarSign, Trash, Edit } from "lucide-react";
+import { CalendarDays, MapPin, CircleDollarSign, Trash} from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import { db } from "../../firebase/firebase";
 import { auth } from "../../firebase/firebase";
-import { useEffect, useState } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { lazy, useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
-import Swal from "sweetalert2";
+import useEvents from "../../hooks/useEvents";
+
+const NavBar = lazy(() => import("../../components/NavBar"))
+
 
 export default function Event({ user, userData }) {
 
     const [userEvents, setUserEvents] = useState([]);
     const [loading, setLoading] = useState(true)
+    const { deleteEvent } = useEvents()
+
 
     useEffect(() => {
         const fetchEvents = async () => {
             try {
                 const querySnapShot = await getDocs(collection(db, "Events"));
                 const data = querySnapShot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                const filteredData = data.filter(event => event.userUID === auth.currentUser.uid)
-                setUserEvents(filteredData)
-                setLoading(true)
+                if (userData.role == "Supplier") {
+                    setUserEvents(data)
+                }
+                else {
+                    const filteredData = data.filter(event => event.uid === auth.currentUser.uid)
+                    setUserEvents(filteredData)
+                }
 
             }
             catch (error) {
@@ -36,29 +44,10 @@ export default function Event({ user, userData }) {
 
         };
         fetchEvents()
-    }, [])
+    }, [userData])
 
     const handleDelete = async (id) => {
-        Swal.fire({
-            icon: 'warning',
-            title: 'are you sure?',
-            text: "You won't be able to revert this!",
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Delete it',
-            cancelButtonText: 'No, Cancel',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                deleteDoc(doc(db, "Events", id))
-                setUserEvents(prev => prev.filter(event => event.id !== id));
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Deleted!',
-                    text: `${userEvents.event_name} has been deleted.`,
-                    showConfirmButton: false,
-                    timer: 1000,
-                })
-            }
-        })
+        deleteEvent(id, setUserEvents)
     }
 
     return (

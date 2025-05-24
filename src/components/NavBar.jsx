@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { Heart, MessageCircleMore, BellDot, User } from "lucide-react";
-import UserDropdown from "./UserDropdown";
-import DropDown from "./DropDown";
-import Swal from "sweetalert2";
+import { Heart, MessageCircleMore, BellDot } from "lucide-react";
+import { lazy } from "react";
+
+const UserDropdown = lazy(() => import("./UserDropdown"))
+const DropDown = lazy(() => import("./DropDown"))
 
 export default function NavBar({ user, userData }) {
     return (

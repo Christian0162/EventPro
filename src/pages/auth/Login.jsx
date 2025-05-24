@@ -5,8 +5,6 @@ import { auth } from "../../firebase/firebase";
 import { Navigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { Title } from "react-head";
-import { db } from "../../firebase/firebase";
-import { getDocs, collection } from "firebase/firestore";
 import Swal from "sweetalert2";
 
 export default function Login({ user }) {
@@ -22,13 +20,9 @@ export default function Login({ user }) {
 
         setError(null)
         setIsLoading(true);
-        const userSnapShot = await getDocs(collection(db, "User"));
-        const data = userSnapShot.docs.map(data => { data.data() })
-
-        console.log(data)
 
         try {
-            login(auth, email, password)
+           await login(auth, email, password)
             Swal.fire({
                 icon: 'success',
                 title: 'Signed in',
@@ -69,7 +63,7 @@ export default function Login({ user }) {
                             {/* email */}
                             <div className="flex flex-col mt-10 mb-5">
                                 <label htmlFor="email" className="font-bold mb-3">Email</label>
-                                <input type="email" name="email" id="email" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="email@example.com"
+                                <input type="email" name="email" id="email" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="email@example.com"
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -80,7 +74,7 @@ export default function Login({ user }) {
                             {/* password */}
                             <div className="flex flex-col mt-3">
                                 <label htmlFor="password" className="font-bold mb-3">Password</label>
-                                <input type="password" name="password" id="password" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-gray-600 focus:ring-1 focus:outline-none" placeholder="******"
+                                <input type="password" name="password" id="password" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="******"
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
