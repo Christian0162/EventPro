@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { Navigation } from "swiper/modules";
 import { Title } from "react-head";
-import { CalendarDays, MapPin, CircleDollarSign, Trash} from "lucide-react";
+import { CalendarDays, MapPin, CircleDollarSign, Trash } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import { db } from "../../firebase/firebase";
 import { auth } from "../../firebase/firebase";
 import { lazy, useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import useEvents from "../../hooks/useEvents";
 
@@ -22,28 +22,26 @@ export default function Event({ user, userData }) {
 
 
     useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const querySnapShot = await getDocs(collection(db, "Events"));
-                const data = querySnapShot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                if (userData.role == "Supplier") {
-                    setUserEvents(data)
-                }
-                else {
-                    const filteredData = data.filter(event => event.uid === auth.currentUser.uid)
-                    setUserEvents(filteredData)
-                }
+        const eventRef = collection(db, "Events")
+        setLoading(true)
+        const unsubscribe = onSnapshot(eventRef, (querySnapShot) => {
+            const data = querySnapShot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            if (userData.role == "Supplier") {
+                setUserEvents(data)
+            }
+            else {
+                const filteredData = data.filter(event => event.uid === auth.currentUser.uid)
+                setUserEvents(filteredData)
+            }
+            setLoading(false)
+            
+        }, (e) => {
+            console.log(e)
+            setLoading(false)
+        })
 
-            }
-            catch (error) {
-                console.log(error)
-            }
-            finally {
-                setLoading(false)
-            }
+        return () => unsubscribe()
 
-        };
-        fetchEvents()
     }, [userData])
 
     const handleDelete = async (id) => {

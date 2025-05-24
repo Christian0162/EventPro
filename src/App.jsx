@@ -7,7 +7,7 @@ import { db } from "./firebase/firebase";
 import Loading from "./components/Loading";
 import { HeadProvider } from "react-head";
 
-const HomePage = lazy(() => import("./pages/HomePage"));
+const Homepage = lazy(() => import("./pages/Homepage"))
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -61,7 +61,7 @@ function App() {
                 <BrowserRouter>
                     <Suspense fallback={<Loading />}>
                         <Routes>
-                            <Route path="/" element={<HomePage user={user} />}></Route>
+                            <Route path="/" element={<Homepage user={user}/>}></Route>
                             <Route path="/register" element={<Register user={user} />}></Route>
                             <Route path="/login" element={<Login user={user} />}></Route>
                             <Route path="/dashboard" element={user ? <Dashboard user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
