@@ -7,9 +7,9 @@ import { db } from "./firebase/firebase";
 import Loading from "./components/Loading";
 import { HeadProvider } from "react-head";
 
-const HomePage = lazy(() => import("./pages/homepage"));
+const HomePage = lazy(() => import("./pages/Homepage"));
 const Register = lazy(() => import("./pages/auth/Register"));
-const Login = lazy(() => import("./pages/auth/login"));
+const Login = lazy(() => import("./pages/auth/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const Review = lazy(() => import("./pages/admin/Review"));
