@@ -1,19 +1,15 @@
 import NavBar from "../../components/NavBar"
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom";
-import { db } from "../../firebase/firebase";
-import { getDoc, doc, updateDoc } from "firebase/firestore";
 import AddressAutoComplete from "../../components/AddressAutoComplete";
 import Select from "react-select"
 import { X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../../components/PrimaryButton";
 import { Link } from "react-router-dom";
-import Swal from "sweetalert2";
+import useEvents from "../../hooks/useEvents";
 
 export default function EditEvent({ user }) {
 
-    const navigate = useNavigate()
     const { id } = useParams();
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [event_name, setEvent_name] = useState('')
@@ -30,6 +26,8 @@ export default function EditEvent({ user }) {
     const [categories, setCategories] = useState('')
     const [event_budget, setEvent_budget] = useState('')
     const [tags, setTags] = useState([])
+
+    const { updateEvent, getEvent } = useEvents()
 
     // console.log(new Date(`1970-01-01T${startTime}`).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit' ,hour12: true}))
 
@@ -63,34 +61,8 @@ export default function EditEvent({ user }) {
         setTags(tags.filter((tag, i) => i !== index))
     }
     useEffect(() => {
-        const fetchEvent = async () => {
-            try {
-                const docRef = await getDoc(doc(db, "Events", id));
-
-                const data = docRef.data()
-
-                if (docRef.exists()) {
-                    setSelectedEvent({ id: docRef.id, ...docRef.data() });
-                    setEvent_name(data.event_name)
-                    setEvent_location(data.event_location)
-                    // setEvent_date(data.event_date)
-                    setEvent_status(data.event_status)
-                    setEvent_type(data.event_type)
-                    setEvent_budget(data.event_budget)
-                    setEvent_description(data.event_description)
-                    setTags(data.event_categories)
-
-                }
-
-            } catch (err) {
-                console.error("Error fetching document:", err);
-            } finally {
-                // setLoading(false);
-            }
-        };
-
-        fetchEvent();
-    }, [id]);
+        getEvent(id, setSelectedEvent, setEvent_name, setEvent_location, setEvent_status, setEvent_type, setEvent_budget, setEvent_description, setTags)
+    }, [id, getEvent]);
 
 
     const handleDate = (e) => {
@@ -110,41 +82,7 @@ export default function EditEvent({ user }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            updateDoc(doc(db, 'Events', id), {
-                event_name: event_name,
-                event_location: event_location,
-                event_date: [year, month, days].join(", "),
-                event_time: [
-                    new Date(`1970-01-01T${startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
-                    new Date(`1970-01-01T${endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
-
-                ].join(" - "),
-                event_status: event_status,
-                event_type: event_type,
-                event_budget: event_budget,
-                event_description: event_description,
-                event_categories: tags,
-            })
-            Swal.fire({
-                icon: 'success',
-                title: 'Update',
-                text: `${event_name} has been updated successfully.`,
-                showConfirmButton: false,
-                timer: 1000
-            })
-            navigate("/events")
-        }
-        catch (error) {
-            console.log(error)
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to update',
-                confirmButtonText: 'Continue',
-                timer: 1000
-            })
-        }
+        await updateEvent(id, event_name, event_location, year, month, days, startTime, endTime, event_status, event_type, event_budget, event_description, tags)
     }
 
     console.log(selectedEvent)
@@ -171,7 +109,7 @@ export default function EditEvent({ user }) {
                             {/* location */}
                             <div className="flex flex-col w-full">
                                 <label htmlFor="location">Location</label>
-                                <AddressAutoComplete setEvent_location={setEvent_location} defaultLocation={event_location}/>
+                                <AddressAutoComplete setEvent_location={setEvent_location} defaultLocation={event_location} />
                             </div>
                         </div>
 
@@ -275,7 +213,7 @@ export default function EditEvent({ user }) {
                                         value={categories}
                                         onChange={setCategories}
                                         placeholder="Categories"
-                                        
+
                                     />
                                     <button type="button" className="py-1 px-2 border-1 border-blue-500 rounded-sm" onClick={addTag}>Add more</button>
                                 </div>
@@ -284,7 +222,7 @@ export default function EditEvent({ user }) {
                         </div>
 
                         <div className="w-full sm:w-full md:w-full lg:w-[40rem] grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <PrimaryButton>Create Event</PrimaryButton>
+                            <PrimaryButton>Update Event</PrimaryButton>
                             <Link to={'/events'} className="flex items-center py-2 w-full text-center justify-center border-1 hover:boder-1 hover:border-blue-500 rounded-sm">
                                 <span className="block">Cancel</span>
                             </Link>

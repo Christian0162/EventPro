@@ -4,12 +4,10 @@ import { useState } from "react";
 import PrimaryButton from "../../components/PrimaryButton";
 import { Link, Navigate } from "react-router-dom";
 import { X } from "lucide-react";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
 import { auth } from "../../firebase/firebase";
 import Loading from "../../components/Loading";
 import AddressAutoComplete from "../../components/AddressAutoComplete";
-import Swal from "sweetalert2";
+import useEvents from "../../hooks/useEvents";
 
 export default function CreateEvent({ user }) {
 
@@ -29,6 +27,8 @@ export default function CreateEvent({ user }) {
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [submitted, setSubmitted] = useState(false);
+
+    const { createEvent } = useEvents()
 
     const categoriesOptions = [
         { label: '123', value: '123' },
@@ -69,28 +69,7 @@ export default function CreateEvent({ user }) {
         if (user) {
             setLoading(true)
 
-            await addDoc(collection(db, "Events"), {
-                uid: user.uid,
-                event_name: event_name,
-                event_location: event_location,
-                event_date: [day, month, year].join(", "),
-                event_time: [
-                    new Date(`1970-01-01T${startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
-                    new Date(`1970-01-01T${endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
-                ].join(" - "),
-                event_status: event_status,
-                event_type: type,
-                event_budget: event_budget,
-                event_description: event_description,
-                event_categories: tags,
-            })
-            Swal.fire({
-                icon: 'success',
-                title: 'Added',
-                text: `${event_name}'s data has been added`,
-                showConfirmButton: false,
-                timer: 1000,
-            })
+            await createEvent(user, event_name, event_location, day, month, year, startTime, endTime, event_status, type, event_budget, event_description, tags)
             setSubmitted(true)
 
         }
