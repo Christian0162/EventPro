@@ -3,7 +3,7 @@ import NavBar from "../components/NavBar";
 import { Calendar, Heart, Users, Star, ChevronRight } from 'lucide-react';
 import { Link } from "react-router-dom";
 
-export default function HomePage({ user }) {
+export default function Homepage({ user }) {
     if (user) {
         return <Navigate to={'/dashboard'} />
     }
