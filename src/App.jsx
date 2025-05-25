@@ -9,7 +9,7 @@ import { HeadProvider } from "react-head";
 
 const GuestLayout = lazy(() => import("./layouts/GuestLayout"))
 const AuthLayout = lazy(() => import("./layouts/AuthLayout"))
-const Homepage = lazy(() => import("./pages/Homepage"))
+const HomePage = lazy(() => import("./pages/Homepage"))
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -65,7 +65,7 @@ function App() {
                         <Routes>
                             <Route path="/" element={
                                 <GuestLayout user={user} userData={userData}>
-                                    <Homepage user={user} />
+                                    <HomePage user={user} />
                                 </GuestLayout>}></Route>
 
                             <Route path="/register" element={
