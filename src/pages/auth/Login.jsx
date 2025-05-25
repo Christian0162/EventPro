@@ -49,11 +49,9 @@ export default function Login({ user }) {
         <>
             <Title>Login</Title>
 
-            <div className="min-h-screen font-sans">
-                <NavBar />
                 <div className="flex w-full h-full justify-center items-center mt-10">
                     <form onSubmit={handleSubmit}>
-                        <div className="p-10 w-[30rem]  border border-gray-400 rounded-lg">
+                        <div className="p-13 w-[30rem] shadow-2xl border border-gray-200 rounded-lg">
                             <div className="space-y-2 flex flex-col justify-center items-center">
                                 <span className="text-3xl font-bold ">Welcome back</span>
                                 <div>
@@ -90,7 +88,6 @@ export default function Login({ user }) {
                         </div>
                     </form>
                 </div>
-            </div>
         </>
     );
 }
