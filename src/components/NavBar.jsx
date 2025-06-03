@@ -9,7 +9,7 @@ export default function NavBar({ user, userData }) {
     return (
         <>
             <nav className="font-sans font-bold">
-                <div className="flex justify-between px-[3rem] items-center py-4  border-b-1 border-b-gray-500">
+                <div className="flex justify-between px-[3rem] items-center py-4 shadow-lg">
                     <div className="flex items-center justify-center space-x-5">
                         <div className="text-3xl">
                             <Link to={user ? '/dashboard' : '/'} className="text-3xl font-bold">

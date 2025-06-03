@@ -7,7 +7,9 @@ import { db } from "./firebase/firebase";
 import Loading from "./components/Loading";
 import { HeadProvider } from "react-head";
 
-const Homepage = lazy(() => import("./pages/HomePage"))
+const GuestLayout = lazy(() => import("./layouts/GuestLayout"))
+const AuthLayout = lazy(() => import("./layouts/AuthLayout"))
+const HomePage = lazy(() => import("./pages/HomePage"))
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -61,26 +63,89 @@ function App() {
                 <BrowserRouter>
                     <Suspense fallback={<Loading />}>
                         <Routes>
-                            <Route path="/" element={<Homepage user={user} />}></Route>
-                            <Route path="/register" element={<Register user={user} />}></Route>
-                            <Route path="/login" element={<Login user={user} />}></Route>
-                            <Route path="/dashboard" element={user ? <Dashboard user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/admin/dashboard" element={user ? <AdminDashboard user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/review/:id" element={user ? <Review user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/verify" element={user ? <SupplierVerification user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/events" element={user ? <Event user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/events/create" element={user ? <CreateEvent user={user} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/events/edit/:id" element={user ? <EditEvent user={user} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/suppliers" element={user ? <Supplier user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/shop" element={user ? <SupplierShop user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/favorites" element={user ? <Favorites user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/chat" element={user ? <ChatWindow user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
-                            <Route path="/notification" element={user ? <Notification user={user} userData={userData} /> : <Navigate to={'/login'} />}></Route>
+                            <Route path="/" element={
+                                <GuestLayout user={user} userData={userData}>
+                                    <HomePage user={user} />
+                                </GuestLayout>}></Route>
+
+                            <Route path="/register" element={
+                                <GuestLayout user={user} userData={userData}>
+                                    <Register user={user} />
+                                </GuestLayout>
+                            }></Route>
+
+                            <Route path="/login" element={
+                                <GuestLayout user={user} userData={userData}>
+                                    <Login user={user} />
+                                </GuestLayout>}>
+                            </Route>
+
+                            <Route path="/dashboard" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <Dashboard user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/admin/dashboard" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <AdminDashboard user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/review/:id" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <Review user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/verify" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <SupplierVerification user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/events" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <Event user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/events/create" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <CreateEvent user={user} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/events/edit/:id" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <EditEvent user={user} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/suppliers" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <Supplier user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/shop" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <SupplierShop user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/favorites" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <Favorites user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/chat" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <ChatWindow user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
+                            <Route path="/notification" element={user ?
+                                <AuthLayout user={user} userData={userData}>
+                                    <Notification user={user} userData={userData} />
+                                </AuthLayout> : <Navigate to={'/login'} />}></Route>
+
                             <Route path="*" element={<Error404 user={user} userData={userData} />}></Route>
+
                         </Routes>
                     </Suspense>
                 </BrowserRouter>
-            </HeadProvider>
+            </HeadProvider >
 
         </>
     )

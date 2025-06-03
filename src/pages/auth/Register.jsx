@@ -1,16 +1,13 @@
-import NavBar from "../../components/NavBar";
 import { useState } from "react";
-import { Calendar, Package } from "lucide-react";
+import { Calendar, Package, Check } from "lucide-react";
 import PrimaryButton from "../../components/PrimaryButton";
-import { auth, db } from "../../firebase/firebase";
-import { setDoc, doc } from "firebase/firestore";
+import { auth } from "../../firebase/firebase";
 import { Navigate } from "react-router-dom";
 import { Title } from "react-head";
 import useAuth from "../../hooks/useAuth";
 
 export default function Register({ user }) {
 
-    const [visible, setVisible] = useState(false);
     const [error, setError] = useState(null);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -18,39 +15,58 @@ export default function Register({ user }) {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [errorEmail, setErrorEmail] = useState('');
+    const [errorPassword, setErrorPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [currentStep, setCurrentStep] = useState(1)
 
     const { register } = useAuth()
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            setIsLoading(true)
+        setIsLoading(true)
 
-            register(auth, email, password)
+        if (password.length < 5) {
+           return setErrorPassword('Password must be at least 6 characters long.')
+        }
+        else {
+            setErrorPassword('')
+        }
 
-            const user = auth.currentUser;
-            setError(null);
-            if (user) {
-                await setDoc(doc(db, "Users", user.uid), {
-                    first_name: firstName,
-                    last_name: lastName,
-                    email: email,
-                    role: role,
-                    isApproved: false,
-                })
-            }
-        }
-        catch (err) {
-            setIsLoading(false)
-            if (err.code === "auth/email-already-in-use") {
-                setErrorEmail("The email is already exist.");
-            }
-            else { setErrorEmail('') }
-        }
+        await register(auth, email, password, firstName, lastName, role, setErrorEmail)
+
+        console.log(errorEmail)
+        setIsLoading(false)
+        setError(null);
+
     }
 
-    const item = ['Event Planner', 'Supplier'];
+    const goToNextStep = () => {
+        if (!role) {
+            setError(true)
+            return
+        }
+
+        setCurrentStep(2)
+    }
+
+    const goToPreviousStep = () => {
+        setCurrentStep(1)
+        setError(false)
+    }
+
+    const roleOptions = [
+        {
+            name: 'Event Planner',
+            description: 'Create and manage events, find suppliers, and coordinate details',
+            icon: Calendar
+        },
+        {
+            name: 'Supplier',
+            description: 'Provide services or products for events, connect with events planners',
+            icon: Package
+        }
+    ];
+
 
     if (user) {
         return <Navigate to="/dashboard" />
@@ -59,112 +75,194 @@ export default function Register({ user }) {
     return (
         <>
             <Title>Register</Title>
-            <div className="min-h-screen ">
-                <NavBar />
+            {/* Progress Indicator */}
+            <div className="flex justify-center mb-10 items-center gap-3 mt-10">
+                <span className={`rounded-full ${currentStep === 2 ? 'bg-green-600' : 'bg-blue-600'} text-white w-8 h-8 items-center flex justify-center font-bold transition-colors duration-300`}>
+                    {currentStep === 2 ? (
+                        <Check className="w-5 h-5" />
+                    ) : (
+                        <span>1</span>
+                    )}
+                </span>
+                <div className={`w-16 h-1 rounded-full transition-colors duration-300 ${currentStep === 2 ? 'bg-green-600' : 'bg-gray-300'}`}></div>
+                <span className={`rounded-full ${currentStep === 2 ? 'bg-blue-600' : 'bg-gray-300'} font-bold text-white w-8 h-8 flex items-center justify-center transition-colors duration-300`}>
+                    2
+                </span>
+            </div>
 
-                {/* 1st process */}
-                <div className="flex flex-col justify-center items-center">
-                    <div className={`mt-10 flex-col justify-center items-center flex ${visible ? 'hidden' : 'block'}`}>
-                        <span className="font-bold text-3xl text-center block">Create an Account</span>
-                        <span className="block text-gray-600 text-center mt-3">Join our platform and start mananging event
-                            providing supplies
-                        </span>
+            <div className="max-w-2xl mx-auto px-4">
+                {/* Step Container with Fixed Height */}
+                <div className="relative min-h-[600px]">
 
-                        {/* role cards */}
-                        <div className="flex-col flex mt-5 mb-4">
-                            {item.map((item, index) => (
-                                <button className={`w-[30rem] mt-5 p-3 transition-all border-2 hover:border-blue-500 ${role == item ? 'border-blue-600' : error ? 'border-red-600' : 'border-gray-600'}  rounded-md`}
-                                    key={index}
-                                    onClick={() => {
-                                        setRole(item);
-                                        setError(false)
-                                    }}
-                                >
-                                    <div className="flex px-3 space-x-3">
-                                        {
-                                            item === 'Event Planner'
-                                                ?
-                                                <Calendar className="rounded-full bg-gray-100 p-2" size={40} color="#2b7fff" />
-                                                :
-                                                <Package className="rounded-full bg-gray-100 p-2" size={40} color="#2b7fff" />
-                                        }
-                                        <div className="flex flex-col space-y-1">
-                                            <span className="text-left flex mt-1 font-bold">{item}</span>
-                                            <span className="break-normal block text-left">
-                                                {item === 'Event Planner' ? 'Create and manage events, find suppliers, and coordinate details'
-                                                    : 'Provide services or products for events, connect with event planners'}
-                                            </span>
+                    {/* Step 1: Role Selection */}
+                    <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${currentStep === 1
+                            ? 'opacity-100 translate-x-0 pointer-events-auto'
+                            : 'opacity-0 -translate-x-8 pointer-events-none'
+                        }`}>
+                        <div className="flex flex-col items-center text-center px-15">
+                            <h1 className="font-bold text-3xl mb-3">Create an Account</h1>
+                            <p className="text-gray-600 mb-8">
+                                Join our platform and start managing events or providing supplies
+                            </p>
+
+                            {/* Role Selection Cards */}
+                            <div className="w-full max-w-lg space-y-4 mb-6">
+                                {roleOptions.map((option, index) => {
+                                    const Icon = option.icon;
+                                    return (
+                                        <button
+                                            key={index}
+                                            className={`w-full p-4 border-2 rounded-lg transition-all duration-200 hover:border-blue-500 hover:shadow-md ${role === option.name
+                                                    ? 'border-blue-600 bg-blue-50'
+                                                    : error
+                                                        ? 'border-red-300'
+                                                        : 'border-gray-200 bg-white'
+                                                }`}
+                                            onClick={() => {
+                                                setRole(option.name);
+                                                setError(false);
+                                            }}
+                                        >
+                                            <div className="flex items-start space-x-4">
+                                                <div className="bg-gray-100 rounded-full p-2 flex-shrink-0">
+                                                    <Icon size={24} className="text-blue-600" />
+                                                </div>
+                                                <div className="text-left flex-1">
+                                                    <h3 className="font-semibold text-lg mb-1">{option.name}</h3>
+                                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                                        {option.description}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {error && (
+                                <p className="text-red-600 text-sm mb-4">
+                                    You must choose a role to proceed
+                                </p>
+                            )}
+
+                            <PrimaryButton onClick={goToNextStep} >
+                                Continue
+                            </PrimaryButton>
+                        </div>
+                    </div>
+
+                    {/* Step 2: Registration Form */}
+                    <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${currentStep === 2
+                            ? 'opacity-100 translate-x-0 pointer-events-auto'
+                            : 'opacity-0 translate-x-8 pointer-events-none'
+                        }`}>
+                        <div className="flex flex-col items-center">
+                            <div className="text-center mb-8">
+                                <h1 className="font-bold text-3xl mb-3">Create an Account</h1>
+                                <p className="text-gray-600">
+                                    Just a few more details to get you started
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 w-full max-w-lg">
+                                <div className="space-y-6">
+                                    {/* Name Fields */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label htmlFor="firstName" className="block font-semibold mb-2">
+                                                First Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="firstName"
+                                                className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                                placeholder="John"
+                                                required
+                                                value={firstName}
+                                                onChange={(e) => setFirstName(e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="lastName" className="block font-semibold mb-2">
+                                                Last Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="lastName"
+                                                className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                                placeholder="Doe"
+                                                required
+                                                value={lastName}
+                                                onChange={(e) => setLastName(e.target.value)}
+                                            />
                                         </div>
                                     </div>
-                                </button>
-                            ))}
-                            <span className={`mt-3 ${error ? 'block text-red-600' : 'hidden'}`}>You must to choose one to proceed</span>
-                        </div>
-                        <PrimaryButton onClick={!role ? () => setError(true) : () =>{ setVisible(true); setError(false) }}>Continue</PrimaryButton>
-                    </div>
-                        
-                    {/* 2nd process */}
-                    <div className={`mt-10 flex-col justify-center items-center flex ${visible ? 'block' : 'hidden'}`}>
-                        <span className="font-bold text-3xl text-center block">Create an Account</span>
-                        <span className="block text-gray-600 text-center mt-3">Join our platform and start mananging event or
-                            providing supplies
-                        </span>
-                        <form onSubmit={handleSubmit}>
-                            <div className="border w-[30rem] mt-5 rounded-lg border-gray-600 p-5">
 
-                                <div className="flex justify-between">
-                                    {/* first name */}
-                                    <div className="flex flex-col">
-                                        <label htmlFor="firstName" className="font-bold mb-3">Full Name</label>
-                                        <input type="text" name="firstName" id="firstName" className="py-2 border border-gray-600 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="John"
+                                    {/* Email Field */}
+                                    <div>
+                                        <label htmlFor="email" className="block font-semibold mb-2">
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                            placeholder="email@example.com"
                                             required
-                                            value={firstName}
-                                            onChange={(e) => setFirstName(e.target.value)} />
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                        />
+                                        {errorEmail && (
+                                            <p className="text-red-500 text-sm mt-1">{errorEmail}</p>
+                                        )}
                                     </div>
 
-                                    {/* last name */}
-                                    <div className="flex flex-col">
-                                        <label htmlFor="lastName" className="font-bold mb-3">Full Name</label>
-                                        <input type="text" name="lastName" id="lastName" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="Doe"
+                                    {/* Password Field */}
+                                    <div>
+                                        <label htmlFor="password" className="block font-semibold mb-2">
+                                            Password
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            minLength={6}
+                                            className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                            placeholder="••••••••"
                                             required
-                                            value={lastName}
-                                            onChange={(e) => setLastName(e.target.value)} />
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
+
+                                        {errorPassword && (
+                                            <p className="text-red-500 text-sm mt-1">{errorPassword}</p>
+                                        )}
                                     </div>
-                                </div>
 
-                                {/* email */}
-                                <div className="flex flex-col mt-5 mb-5">
-                                    <label htmlFor="email" className="font-bold mb-3">Email</label>
-                                    <input type="email" name="email" id="email" className="py-2 border border-gray-500 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="email@example.com"
-                                        required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                    />
-                                    <span className={`${errorEmail ? 'block text-red-500' : 'hidden'} mt-2`}>{errorEmail}</span>
-                                </div>
+                                    {/* Role Display and Change */}
+                                    <div className="bg-gray-50 p-3 rounded-md">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <span className="text-gray-600 text-sm">Account type:</span>
+                                                <span className="font-semibold ml-2">{role}</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+                                                onClick={goToPreviousStep}
+                                            >
+                                                Change
+                                            </button>
+                                        </div>
+                                    </div>
 
-                                {/* password */}
-                                <div className="flex flex-col mt-5 mb-5">
-                                    <label htmlFor="password" className="font-bold mb-3">Password</label>
-                                    <input type="password" name="password" id="password" minLength={6} className="py-2 border border-gray-500 rounded-md px-3 focus:ring-blue-600 focus:ring-1 focus:outline-none" placeholder="******"
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
-                                    {/* <span className={`${password.length < 6 ? 'block text-red-500' : 'hidden'} mt-2`}>Weak password. The length must atleast 6 characters</span> */}
+                                    <PrimaryButton onClick={handleSubmit} disabled={isLoading}>
+                                        {isLoading ? "Creating account..." : "Create account"}
+                                    </PrimaryButton>
                                 </div>
-
-                                <div className="space-x-1 mb-4">
-                                    <span className="text-gray-600">Account type: </span>
-                                    <span>{role}</span>
-                                    <button type="button" className="text-blue-600" onClick={() => setVisible(!visible)}>Change</button>
-                                </div>
-                                <PrimaryButton>{isLoading ? "Loading.." : "Create an account"}</PrimaryButton>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-
             </div>
         </>
     );

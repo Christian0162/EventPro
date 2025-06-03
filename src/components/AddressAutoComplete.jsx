@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
 
-export default function AddressAutocomplete({ setEvent_location, defaultLocation = "", disabled }) {
+export default function AddressAutocomplete({ setLocation, default_location = "", disabled, className }) {
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState([])
+    const [isTyping, setIsTyping] = useState(false)
 
     useEffect(() => {
 
-        setQuery(defaultLocation)
+        if (!isTyping) {
+            setQuery(default_location)
+        }
 
-    }, [defaultLocation])
+    }, [default_location])
 
     const handleChange = async (e) => {
         const value = e.target.value;
         setQuery(value);
+        setIsTyping(true)
 
 
         if (value.length < 2) {
@@ -33,7 +37,7 @@ export default function AddressAutocomplete({ setEvent_location, defaultLocation
             item.properties.country,
         ].filter(Boolean).join(", ")
         setSuggestions([])
-        setEvent_location(location)
+        setLocation(location)
         setQuery(location)
     }
 
@@ -42,7 +46,7 @@ export default function AddressAutocomplete({ setEvent_location, defaultLocation
         <>
             <OutsideClickHandler onOutsideClick={() => setSuggestions([])}>
                 <div>
-                    <input type="text" disabled={disabled} className="mt-2 focus:ring-2 focus:outline-none px-2 focus:ring-blue-500 ring-1 rounded-sm w-full h-8 ring-black"
+                    <input type="text" disabled={disabled} className={`focus:ring-2 focus:outline-none px-2 focus:ring-blue-500 ring-1 w-full ring-black ${className}`}
                         value={query}
                         required
                         placeholder="Type an address"
