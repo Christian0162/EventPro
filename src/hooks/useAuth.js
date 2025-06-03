@@ -2,11 +2,12 @@ import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } f
 import { setDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import bcrypt from "bcryptjs";
+import Swal from "sweetalert2";
 
 export default function useAuth() {
 
 
-    const login = async (auth, email, password) => {
+    const login = async (auth, email, password, setError) => {
         try {
             const currentUser = await signInWithEmailAndPassword(auth, email, password);
 
@@ -16,13 +17,22 @@ export default function useAuth() {
                 await updateDoc(doc(db, "Users", user.uid), {
                     lastLoginAt: serverTimestamp()
                 })
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Signed in',
+                    text: 'Successfully Signed in',
+                    timer: 1000,
+                    showConfirmButton: false
+                })
             }
             else {
                 console.log('no user found')
             }
         }
         catch (e) {
-            console.log(e);
+            if (e.code === 'auth/invalid-credential' || e.code === 'auth/invalid-credentials') {
+                setError("invalid credentials")
+            }
         }
     }
 

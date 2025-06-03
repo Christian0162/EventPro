@@ -44,7 +44,6 @@ export default function NavBar({ user, userData }) {
                         <div className="space-x-8 text-sm hidden sm:block">
                             <Link to={'/login'}>LOGIN</Link>
                             <Link to={'/register'}>REGISTER</Link>
-                            <Link to={'/'}>CONTACT</Link>
                         </div>
                     }
 
