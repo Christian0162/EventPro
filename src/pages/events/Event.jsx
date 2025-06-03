@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Navigation } from "swiper/modules";
 import { Title } from "react-head";
-import { CalendarDays, MapPin, CircleDollarSign, Trash } from "lucide-react";
+import { CalendarDays, MapPin, CircleDollarSign, Trash, Users } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import { db } from "../../firebase/firebase";
@@ -48,13 +48,14 @@ export default function Event({ userData }) {
         deleteEvent(id, setUserEvents)
     }
 
+    console.log(userData)
     return (
         <>
             <Title>Event</Title>
 
             <div className="flex justify-between md:items-center lg:items-center flex-col lg:flex-row md:flex-row">
                 <div className="flex flex-col">
-                    <span className="text-3xl font-bold">Events</span>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Events</h1>
                     <span className="mt-2 text-gray-600">Create and manage your events in one place</span>
                 </div>
                 <Link to={'/events/create'}>
@@ -89,37 +90,52 @@ export default function Event({ userData }) {
                                         key={index}
                                     >
                                         {/* event cards */}
-                                        <div className="h-full w-full border-1 border-black p-6 rounded-lg mt-6 ">
+                                        <div className="group transition-all duration-200 h-full w-full border-1 border-gray-200 hover:shadow-2xl hover:-translate-y-3 p-6 rounded-lg mt-6 ">
                                             <div className="flex justify-end">
-                                                <button onClick={() => handleDelete(events.id)} className="self-end"><Trash width={24} height={24} strokeWidth={2} /></button>
+                                                <button onClick={() => handleDelete(events.id)} className="self-end transition-all duration-200 opacity-0 group-hover:opacity-100 active:text-violet-600"><Trash width={24} height={24} strokeWidth={2} /></button>
                                             </div>
 
-                                            <div className="flex justify-between items-center mb-5 mt-3">
-                                                <span className="block text-4xl">{events.event_name.length > 10 ? events.event_name.slice(0, 10) + ".." : events.event_name}</span>
-                                                <span className={`${events.event_status.value === "upcoming" ? "bg-purple-600" : events.event_status.value === "planning" ? "bg-sky-500" : "bg-green-500"} rounded-xl py-1 px-5 text-white`}>{events.event_status.value}</span>
+                                            {/* event name */}
+                                            <div className="flex justify-between items-center mb-7 mt-3">
+                                                <span className="block text-3xl font-bold text-gray-900">{events.event_name.length > 10 ? events.event_name.slice(0, 10) + ".." : events.event_name}</span>
+                                                <span className={`${events.event_status.value === "upcoming" ? "bg-purple-600" : events.event_status.value === "planning" ? "bg-sky-500" : "bg-green-500"} rounded-full shadow-lg py-1 px-5 text-white`}>{events.event_status.value}</span>
                                             </div>
+
+                                            {/* event date and time */}
                                             <div className="flex flex-col space-y-5">
-                                                <div className="flex space-x-2">
-                                                    <span className="block"><CalendarDays /></span>
-                                                    <span>{events.event_date}<br></br> {events.event_time}</span>
+                                                <div className="flex space-x-2 items-center gap-2">
+                                                    <span className="rounded-xl bg-blue-200 h-10 w-10 flex items-center justify-center text-blue-600"><CalendarDays /></span>
+                                                    <span className="text-gray-900 font-bold">{events?.event_date?.date_preview?.join(", ")}
+                                                        <br></br> {events?.event_time?.previewStartAndEnd}</span>
                                                 </div>
-                                                <div className="flex space-x-2">
-                                                    <span className="block"><MapPin /></span>
-                                                    <span>{events.event_location}</span>
+
+                                                {/* event location */}
+                                                <div className="flex space-x-2 items-center gap-2">
+                                                    <span className="rounded-xl bg-green-200 h-10 w-10 flex items-center justify-center text-green-600"><MapPin /></span>
+                                                    <span className="text-gray-700">{events.event_location}</span>
                                                 </div>
-                                                <div className="flex space-x-2">
-                                                    <span className="block"><CircleDollarSign /></span>
-                                                    <span>{events.event_budget}</span>
+
+                                                {/* event budget */}
+                                                <div className="flex space-x-2 items-center gap-2">
+                                                    <span className="rounded-xl bg-yellow-200 h-10 w-10 flex items-center justify-center text-yellow-600"><CircleDollarSign /></span>
+                                                    <span className="font-bold text-gray-900">{events.event_budget} $</span>
                                                 </div>
+
+                                                {/* event suppliers */}
                                                 <div>
-                                                    <span>Looking for supplier:</span>
-                                                    <div className="grid grid-cols-4 gap-3 mt-2">
+                                                    <div className="flex gap-2 items-center mb-5">
+                                                        <Users className="text-gray-600 h-5 w-5" />
+                                                        <span className="text-md text-gray-800">Looking for supplier:</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-5 mt-2">
                                                         {events.event_categories.map((categories, index) => (
-                                                            <span key={index} className="py-1 px-5 border-1 border-black rounded-xl text-center">{categories}</span>
+                                                            <span key={index} className="text-center items-center w-26 py-1 rounded-full text-sm font-medium bg-gray-300 text-gray-500">{categories}</span>
                                                         ))}
                                                     </div>
-                                                    <p className="block mt-3 break-words">{events.event_description}</p>
-                                                    <Link to={`/events/edit/${events.id}`} className="block text-center mt-5 py-3 w-full bg-blue-600 text-white font-bold rounded-lg">Manage Event</Link>
+
+                                                    {/* description */}
+                                                    <p className="mt-5 text-gray-800 break-wordsrounded-lg px-2 mb-5">{events.event_description.length > 1 ? events.event_description : "No description provided"}</p>
+                                                    <Link to={`/events/edit/${events.id}`} className="block text-center mt-5 py-3 w-full bg-blue-600 text-white font-bold rounded-lg">{userData?.role === 'Supplier' ? 'Apply' : 'Manage Event'}</Link>
                                                 </div>
                                             </div>
                                         </div>

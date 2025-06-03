@@ -47,7 +47,7 @@ export default function HomePage({ user }) {
                                     className="group px-8 py-4 bg-white border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                                 >
                                     <span className="flex items-center justify-center">
-                                        <Link to={'/login'}>Login</Link>c
+                                        <Link to={'/login'}>Login</Link>
                                         <ChevronRight className={`ml-2 w-5 h-5 transition-transform duration-300 hover:translate-x-1`} />
                                     </span>
                                 </button>

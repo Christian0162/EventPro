@@ -5,8 +5,8 @@ export default function Notification() {
     return (
         <>
             <Title>Notifications</Title>
-            <span className="text-3xl font-bold">Notifications</span>
 
+            <h1 className="mb-5 text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Notifications</h1>
             <div className="h-full w-full border-1 rounded-lg pl-10 py-8 flex flex-col mt-5">
 
                 {/* message */}

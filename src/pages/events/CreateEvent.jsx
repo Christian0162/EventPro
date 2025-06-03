@@ -1,5 +1,5 @@
 import Select from "react-select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PrimaryButton from "../../components/PrimaryButton";
 import { Link, Navigate } from "react-router-dom";
 import { X } from "lucide-react";
@@ -20,46 +20,73 @@ export default function CreateEvent() {
     const [event_date, setEvent_date] = useState([]);
     const [event_budget, setEvent_budget] = useState('');
     const [event_description, setEvent_description] = useState('');
-    const [month, setMonth] = useState('')
-    const [day, setDay] = useState('')
-    const [year, setYear] = useState('')
+    const [event_time, setEvent_time] = useState([])
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [submitted, setSubmitted] = useState(false);
 
+    console.log(event_budget)
+
+    useEffect(() => {
+
+        const previewStartAndEnd = [
+            new Date(`1970-01-01T${startTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
+            new Date(`1970-01-01T${endTime}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
+        ].join(' - ')
+
+        const valueStartAndEnd = [startTime, endTime]
+
+        setEvent_time({ previewStartAndEnd, valueStartAndEnd })
+
+    }, [startTime, endTime])
+
     const { createEvent } = useEvents()
 
     const categoriesOptions = [
-        { label: '123', value: '123' },
-        { label: '4', value: '4' },
-        { label: '5', value: '5' },
-    ]
+        { label: 'Catering', value: 'catering' },
+        { label: 'Photography', value: 'photography' },
+        { label: 'Entertainment', value: 'entertainment' },
+        { label: 'Decoration', value: 'decoration' },
+        { label: 'Security', value: 'security' },
+        { label: 'Transportation', value: 'transportation' },
+        { label: 'Audio/Visual', value: 'audiovisual' },
+        { label: 'Venue', value: 'venue' },
+    ];
 
     const statusOptions = [
-        { label: 'Upcoming', value: 'upcoming' },
         { label: 'Planning', value: 'planning' },
+        { label: 'Upcoming', value: 'upcoming' },
+        { label: 'In Progress', value: 'in-progress' },
         { label: 'Complete', value: 'complete' },
-    ]
+    ];
 
     const typeOptions = [
-        { label: 'test', value: 'test' },
-        { label: 'test', value: 'test' },
-    ]
+        { label: 'Corporate', value: 'corporate' },
+        { label: 'Wedding', value: 'wedding' },
+        { label: 'Birthday Party', value: 'birthday' },
+        { label: 'Conference', value: 'conference' },
+        { label: 'Workshop', value: 'workshop' },
+        { label: 'Social Event', value: 'social' },
+        { label: 'Other', value: 'other' },
+    ];
 
 
     const handleDate = (e) => {
         const dateString = e.target.value
         const date = new Date(dateString)
-        setEvent_date(dateString)
 
         const years = date.getFullYear();
         const months = date.toLocaleDateString([], { month: "long" })
         const days = date.toLocaleDateString([], { weekday: "long" })
 
-        setMonth(months)
-        setDay(days)
-        setYear(years)
+        const previewDate = [years, months, days]
+
+        setEvent_date({
+            date_value: dateString,
+            date_preview: previewDate
+        })
     }
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -68,7 +95,16 @@ export default function CreateEvent() {
         if (user) {
             setLoading(true)
 
-            await createEvent(user, event_name, event_location, day, month, year, startTime, endTime, event_status, type, event_budget, event_description, tags)
+            await createEvent(user,
+                event_name,
+                event_location,
+                event_date,
+                event_time,
+                event_status,
+                type,
+                event_budget,
+                event_description,
+                tags)
             setSubmitted(true)
 
         }
@@ -81,7 +117,7 @@ export default function CreateEvent() {
     }
 
     const removeTag = (index) => {
-        setTags(tags.filter((tag, i) => i !== index));
+        setTags(tags.filter((tag  ,i) => i !== index));
     }
 
     const addTag = () => {
@@ -119,7 +155,7 @@ export default function CreateEvent() {
                     {/* location */}
                     <div className="flex flex-col w-full">
                         <label htmlFor="location">Location</label>
-                        <AddressAutoComplete setEvent_location={setEvent_location} />
+                        <AddressAutoComplete setLocation={setEvent_location} className={'mt-2 py-1 rounded-sm'}/>
                     </div>
                 </div>
 
@@ -132,7 +168,7 @@ export default function CreateEvent() {
                         <input type="date" name="event_date" className="mt-2 focus:ring-2 focus:outline-none px-2 focus:ring-blue-500 ring-1 rounded-sm w-full h-8 ring-black"
                             required
                             onChange={handleDate}
-                            value={event_date}
+                            value={event_date.date_value}
                         />
                     </div>
 
@@ -206,30 +242,51 @@ export default function CreateEvent() {
                     ></textarea>
                 </div>
 
-                {/* sepcify supplier */}
-                <div className="flex flex-col">
-                    <span className="block mb-2" > Specify the supplier you are looking for: </span>
+                {/* specify supplier */}
+                <div className="flex flex-col space-y-4">
+                    <span className="block font-medium">Specify the supplier you are looking for:</span>
 
-                    <div className="grid grid-cols-1 md:flex w-full gap-3">
-                        <div className={`gap-2 w-full grid grid-cols-2  ${tags.length > 0 ? "md:flex" : "hidden"}`}>
+                    {/* Tags Display */}
+                    {tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
                             {tags.map((tag, index) => (
-                                <span key={index} className="py-1 w-full lg:w-1/2 px-3 border-1 rounded-lg flex items-center justify-between border-black">
+                                <span
+                                    key={index}
+                                    className="inline-flex items-center gap-2 py-2 px-3 bg-blue-50 border border-blue-200 rounded-lg text-sm"
+                                >
                                     {tag}
-                                    <button type="button" onClick={() => removeTag(index)}><X width={16} strokeWidth={2} /></button>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeTag(index)}
+                                        className="hover:bg-blue-100 rounded-full p-1 transition-colors"
+                                    >
+                                        <X width={14} height={14} strokeWidth={2} />
+                                    </button>
                                 </span>
                             ))}
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 md:w-[35rem] lg:w-[40rem] gap-2">
+                    )}
+
+                    {/* Add Supplier Controls */}
+                    <div className="flex md:grid md:grid-cols-3 gap-3 items-end">
+                        <div className="md:col-span-2">
                             <Select
                                 options={categoriesOptions}
                                 value={categories}
                                 onChange={setCategories}
-                                placeholder="Categories"
+                                placeholder="Select supplier category"
                                 isClearable
+                                className="w-full"
                             />
-                            <button type="button" className="py-1 px-2 border-1 border-blue-500 rounded-sm" onClick={addTag}>Add more</button>
                         </div>
-
+                        <button
+                            type="button"
+                            className="py-2 px-4 bg-blue-500 text-white rounded-sm hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            onClick={addTag}
+                            disabled={!categories || !categories.value.trim()}
+                        >
+                            Add Supplier
+                        </button>
                     </div>
                 </div>
 

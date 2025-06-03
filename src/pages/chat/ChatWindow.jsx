@@ -39,7 +39,7 @@ export default function ChatWindow() {
 
     return (
         <>
-            <span className="block text-3xl font-bold mb-5 text-gray-600">Chats</span>
+            <h1 className="mb-5 text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Chat</h1>
             <div className="flex h-screen shadow-lg bg-gray-100 border border-gray-300 rounded-lg">
 
                 {/* Sidebar */}

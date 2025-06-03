@@ -4,6 +4,7 @@ import { db } from "../../firebase/firebase";
 import { Title } from "react-head";
 import DashboardCard from "../../components/DashboardCards";
 import { Users, IdCard, CalendarPlus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function AdminDashboard() {
 
@@ -14,14 +15,14 @@ export default function AdminDashboard() {
         const fetchingData = async () => {
 
             setIsLoading(true)
-            const snapAllUsers = await getDocs(collection(db, "Users"))
+            const snapAllUsers = await getDocs(collection(db, "Shops"))
             const allUsers = snapAllUsers.docs.map(data => ({ id: data.id, ...data.data() }))
-            const snapData = await getDocs(collection(db, "UserVerificiations"))
+            const snapData = await getDocs(collection(db, "ShopVerification"))
             const verification_data = snapData.docs.map(data => {
 
                 const matchedUser = allUsers.find(user => user.id === data.id)
 
-                if (matchedUser?.isApproved !== true) {
+                if (matchedUser?.isApproved === "pending") {
                     return {
                         id: data.id,
                         user: matchedUser,
@@ -29,6 +30,7 @@ export default function AdminDashboard() {
                     }
                 }
             }).filter(Boolean)
+
             setData(verification_data)
             setIsLoading(false)
 
@@ -38,17 +40,19 @@ export default function AdminDashboard() {
 
 
     const firstLetter = (name) => {
-        if (name.length > 3) {
+        if (name?.length > 3) {
             return name.slice(0, 1).toUpperCase()
         }
     }
+
+    console.log(data)
 
     return (
         <>
             <Title>Admin - Dashboard</Title>
             <div className="flex justify-between items-center flex-col lg:flex-row md:flex-row">
                 <div className="flex flex-col">
-                    <span className="text-3xl font-bold">Dashboard</span>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h1>
                 </div>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-5">
@@ -92,9 +96,9 @@ export default function AdminDashboard() {
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center space-x-3">
                                     <div className="flex items-center justify-center rounded-full bg-gray-300 h-10 w-10">
-                                        <span className="text-xl">{firstLetter(datas?.business_name)}</span>
+                                        <span className="text-xl">{firstLetter(datas?.supplier_name)}</span>
                                     </div>
-                                    <span className="block">{datas?.business_name}</span>
+                                    <span className="block">{datas?.supplier_name}</span>
                                 </div>
                                 <Link to={`/review/${datas.id}`} className="px-6 py-1 bg-blue-600 rounded-lg text-white">Review</Link>
                             </div>
@@ -106,9 +110,8 @@ export default function AdminDashboard() {
                     {isLoading && (
                         <span className="text-center">Loading..</span>
                     )}
-                    {data.length === 0 && (
-                        <span className="block text-center text-gray-500">No Pending Request..</span>
-                    )}
+                    <span className={` ${data.length > 0 || isLoading ? 'hidden' : 'block'} text-center text-gray-500`}>No Pending Request..</span>
+
                 </div>
             </div>
         </>

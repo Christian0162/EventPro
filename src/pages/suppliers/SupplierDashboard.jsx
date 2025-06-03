@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import DashboardCard from "../../components/DashboardCards"
-import { Eye, DollarSignIcon, CalendarPlus, Calendar, CircleCheck } from "lucide-react"
+import { Eye, DollarSignIcon, CalendarPlus, Calendar } from "lucide-react"
 import { Title } from "react-head"
 
 export default function SupplierDashboard({ userData }) {
@@ -11,15 +11,9 @@ export default function SupplierDashboard({ userData }) {
             <Title>Dashboard</Title>
             <div className="flex justify-between items-center flex-col lg:flex-row md:flex-row">
                 <div className="flex flex-col">
-                    <span className="text-3xl font-bold">Dashboard</span>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h1>
                     <span className={`${userData.role == 'admin' ? 'hidden' : 'block'} mt-2 text-gray-600`}>Welcome back, {userData?.first_name}</span>
                 </div>
-                <Link to={'/verify'} className={`flex ${userData.isApproved ? 'pointer-events-none text-gray-400 cursor-not-allowed' : ""} space-x-3 items-center border-1 border-black rounded-md px-5 lg:px-8 md:px-6 sm:px-4 py-2 lg:py-1 font-bold mt-3`}>
-                    <CircleCheck size={21} color={userData.isApproved ? 'blue' : 'gray'} />
-                    <span>
-                        {userData.isApproved ? "Verified Account" : "Verify Account"}
-                    </span>
-                </Link>
             </div>
 
             {/* supplier*/}

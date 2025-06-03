@@ -15,6 +15,7 @@ export default function Register({ user }) {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('');
     const [errorEmail, setErrorEmail] = useState('');
+    const [errorPassword, setErrorPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [currentStep, setCurrentStep] = useState(1)
 
@@ -22,25 +23,25 @@ export default function Register({ user }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            setIsLoading(true)
+        setIsLoading(true)
 
-            await register(auth, email, password, firstName, lastName, role)
-
-            setError(null);
-
+        if (password.length < 5) {
+           return setErrorPassword('Password must be at least 6 characters long.')
         }
-        catch (err) {
-            setIsLoading(false)
-            if (err.code === "auth/email-already-in-use") {
-                setErrorEmail("The email is already exist.");
-            }
-            else { setErrorEmail('') }
+        else {
+            setErrorPassword('')
         }
+
+        await register(auth, email, password, firstName, lastName, role, setErrorEmail)
+
+        console.log(errorEmail)
+        setIsLoading(false)
+        setError(null);
+
     }
 
     const goToNextStep = () => {
-        if(!role) {
+        if (!role) {
             setError(true)
             return
         }
@@ -54,17 +55,17 @@ export default function Register({ user }) {
     }
 
     const roleOptions = [
-  {
-    name: 'Event Planner',
-    description: 'Create and manage events, find suppliers, and coordinate details',
-    icon: Calendar
-  },
-  {
-    name: 'Supplier',
-    description: 'Provide services or products for events, connect with events planners',
-    icon: Package
-  }
-];
+        {
+            name: 'Event Planner',
+            description: 'Create and manage events, find suppliers, and coordinate details',
+            icon: Calendar
+        },
+        {
+            name: 'Supplier',
+            description: 'Provide services or products for events, connect with events planners',
+            icon: Package
+        }
+    ];
 
 
     if (user) {
@@ -74,7 +75,7 @@ export default function Register({ user }) {
     return (
         <>
             <Title>Register</Title>
-             {/* Progress Indicator */}
+            {/* Progress Indicator */}
             <div className="flex justify-center mb-10 items-center gap-3 mt-10">
                 <span className={`rounded-full ${currentStep === 2 ? 'bg-green-600' : 'bg-blue-600'} text-white w-8 h-8 items-center flex justify-center font-bold transition-colors duration-300`}>
                     {currentStep === 2 ? (
@@ -92,13 +93,12 @@ export default function Register({ user }) {
             <div className="max-w-2xl mx-auto px-4">
                 {/* Step Container with Fixed Height */}
                 <div className="relative min-h-[600px]">
-                    
+
                     {/* Step 1: Role Selection */}
-                    <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                        currentStep === 1 
-                            ? 'opacity-100 translate-x-0 pointer-events-auto' 
+                    <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${currentStep === 1
+                            ? 'opacity-100 translate-x-0 pointer-events-auto'
                             : 'opacity-0 -translate-x-8 pointer-events-none'
-                    }`}>
+                        }`}>
                         <div className="flex flex-col items-center text-center px-15">
                             <h1 className="font-bold text-3xl mb-3">Create an Account</h1>
                             <p className="text-gray-600 mb-8">
@@ -112,13 +112,12 @@ export default function Register({ user }) {
                                     return (
                                         <button
                                             key={index}
-                                            className={`w-full p-4 border-2 rounded-lg transition-all duration-200 hover:border-blue-500 hover:shadow-md ${
-                                                role === option.name 
-                                                    ? 'border-blue-600 bg-blue-50' 
-                                                    : error 
-                                                        ? 'border-red-300' 
+                                            className={`w-full p-4 border-2 rounded-lg transition-all duration-200 hover:border-blue-500 hover:shadow-md ${role === option.name
+                                                    ? 'border-blue-600 bg-blue-50'
+                                                    : error
+                                                        ? 'border-red-300'
                                                         : 'border-gray-200 bg-white'
-                                            }`}
+                                                }`}
                                             onClick={() => {
                                                 setRole(option.name);
                                                 setError(false);
@@ -153,11 +152,10 @@ export default function Register({ user }) {
                     </div>
 
                     {/* Step 2: Registration Form */}
-                    <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                        currentStep === 2 
-                            ? 'opacity-100 translate-x-0 pointer-events-auto' 
+                    <div className={`absolute inset-0 transition-all duration-500 ease-in-out ${currentStep === 2
+                            ? 'opacity-100 translate-x-0 pointer-events-auto'
                             : 'opacity-0 translate-x-8 pointer-events-none'
-                    }`}>
+                        }`}>
                         <div className="flex flex-col items-center">
                             <div className="text-center mb-8">
                                 <h1 className="font-bold text-3xl mb-3">Create an Account</h1>
@@ -234,6 +232,10 @@ export default function Register({ user }) {
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                         />
+
+                                        {errorPassword && (
+                                            <p className="text-red-500 text-sm mt-1">{errorPassword}</p>
+                                        )}
                                     </div>
 
                                     {/* Role Display and Change */}

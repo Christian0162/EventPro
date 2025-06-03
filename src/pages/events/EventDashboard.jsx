@@ -11,7 +11,7 @@ export default function EventDashboard({ userData }) {
             <Title>Dashboard</Title>
             <div className="flex justify-between items-center flex-col lg:flex-row md:flex-row">
                 <div className="flex flex-col">
-                    <span className="text-3xl font-bold">Dashboard</span>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h1>
                     <span className={`mt-2 text-gray-600`}>Welcome back, {userData?.first_name}</span>
                 </div>
                 <Link to={'/events/create'} className={`${userData.role == 'admin' ? 'hidden' : 'block'} bg-blue-600 text-white rounded-md px-5 lg:px-10 md:px-8 sm:px-7 py-2 lg:py-3 font-bold mt-3`}>Create New Event</Link>
