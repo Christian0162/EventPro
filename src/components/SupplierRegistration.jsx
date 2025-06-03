@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { auth } from '../firebase/firebase';
+import Swal from 'sweetalert2';
+import { Navigate } from 'react-router-dom';
 
 export default function SupplierRegistration() {
 
@@ -88,9 +90,18 @@ export default function SupplierRegistration() {
             //     comment: "",
             //     createdAt: serverTimestamp()
             // });
-
             setIsLoading(false)
-            window.location.reload();
+            Swal.fire({
+                title: 'Success',
+                icon: 'success',
+                text: 'Shop created successfully',
+                confirmButtonText: 'Ok'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    return Navigate('/shop')
+                }
+            })
+            
         }
         catch (e) {
             console.log(e);
@@ -308,7 +319,7 @@ export default function SupplierRegistration() {
                                         required
                                         onChange={(e) => setPrice(e.target.value)}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg  focus:border-transparent transition-colors"
-                                        placeholder="e.g., ₱5,000 minimum order"
+                                        placeholder="e.g., ₱5,000"
                                     />
                                 </div>
                             </div>

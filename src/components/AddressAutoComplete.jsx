@@ -18,6 +18,7 @@ export default function AddressAutocomplete({ setLocation, default_location = ""
         const value = e.target.value;
         setQuery(value);
         setIsTyping(true)
+        setLocation(value)
 
 
         if (value.length < 2) {
@@ -25,7 +26,7 @@ export default function AddressAutocomplete({ setLocation, default_location = ""
             return;
         }
 
-        const response = await fetch(`https://photon.komoot.io/api/?q=${value}&bbox=116.87,4.59,126.61,21.12`)
+        const response = await fetch(`https://photon.komoot.io/api/?q=${value}&bbox=123.80,10.25,123.95,10.40`)
         const data = await response.json();
         setSuggestions(data.features);
     }
@@ -40,7 +41,6 @@ export default function AddressAutocomplete({ setLocation, default_location = ""
         setLocation(location)
         setQuery(location)
     }
-
 
     return (
         <>

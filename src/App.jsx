@@ -29,13 +29,12 @@ const Error404 = lazy(() => import("./components/Error404"));
 
 function App() {
     const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [userData, setUserData] = useState(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                setIsLoading(true);
                 setUser(user)
                 const userDocRef = doc(db, "Users", user.uid);
                 const docSnap = await getDoc(userDocRef);
