@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom";
 import AddressAutoComplete from "../../components/AddressAutoComplete";
 import Select from "react-select"
-import { X, MessageCircleMore  } from "lucide-react";
+import { X, MessageCircleMore } from "lucide-react";
 import PrimaryButton from "../../components/PrimaryButton";
 import { Link } from "react-router-dom";
 import useEvents from "../../hooks/useEvents";
@@ -186,9 +186,6 @@ export default function EditEvent() {
         }).then(async (result) => {
 
             if (result.isConfirmed) {
-                // const snapShotApplications = await getDocs(collection(db, "Applications"))
-                // const applications = snapShotApplications.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                // const filteredApplications = applications.filter(app => app.user_id === supplier_id)
 
                 const q = query(collection(db, "Applications"),
                     where("event_id", "==", id),
@@ -201,14 +198,14 @@ export default function EditEvent() {
                 for (const app of applications) {
                     const appRef = doc(db, "Applications", app.id);
                     await updateDoc(appRef, {
-                        status: "Confirmed"
+                        status: "Approved"
                     });
 
                     await addDoc(collection(db, "Notifications"), {
                         user_id: app.user_id,
                         avatar: 'A',
                         title: 'Your application has been approved!',
-                        message: "The event you applied for has been approved.",
+                        message: `The event "${event_name}" you applied for has been approved.`,
                         timestamp: serverTimestamp(),
                         unread: true
                     });
@@ -229,9 +226,6 @@ export default function EditEvent() {
         }).then(async (result) => {
 
             if (result.isConfirmed) {
-                // const snapShotApplications = await getDocs(collection(db, "Applications"))
-                // const applications = snapShotApplications.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                // const filteredApplications = applications.filter(app => app.user_id === supplier_id)
 
                 const q = query(collection(db, "Applications"),
                     where("event_id", "==", id),
@@ -244,17 +238,18 @@ export default function EditEvent() {
                 for (const app of applications) {
                     const appRef = doc(db, "Applications", app.id);
                     await updateDoc(appRef, {
-                        status: "Confirmed"
+                        status: "Reject"
                     });
 
                     await addDoc(collection(db, "Notifications"), {
                         user_id: app.user_id,
                         avatar: 'A',
-                        title: 'Your application has been approved!',
-                        message: "The event you applied for has been approved.",
+                        title: 'Application Rejected',
+                        message: `We're sorry, your application for the event "${event_name}" has been rejected.`,
                         timestamp: serverTimestamp(),
                         unread: true
                     });
+
                 }
                 Swal.fire('Success', 'The supplier has been approved and notified.', 'success')
             }

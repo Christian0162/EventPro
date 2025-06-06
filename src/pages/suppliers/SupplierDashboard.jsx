@@ -115,7 +115,7 @@ export default function SupplierDashboard({ userData }) {
                                             </div>
                                         </div>
                                         <button
-                                            className={`px-4 py-1 rounded-lg text-white text-sm ${application.status === 'Confirmed'
+                                            className={`px-4 py-1 rounded-lg text-white text-sm ${application.status === 'Approved'
                                                 ? 'bg-green-600 hover:bg-blue-700'
                                                 : application.status === 'Pending'
                                                     ? 'bg-yellow-500 hover:bg-yellow-600'
