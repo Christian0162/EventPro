@@ -15,6 +15,7 @@ export default function ChatWindow({ userData }) {
     const [messages, setMessages] = useState([])
     const [isOpen, setIsOpen] = useState(false);
     const [isSending, setIsSending] = useState(false)
+    const [shop, setShop] = useState([])
     const messagesEndRef = useRef(null);
 
     function open() {
@@ -24,6 +25,17 @@ export default function ChatWindow({ userData }) {
     function close() {
         setIsOpen(false)
     }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const onSnapShop = await getDocs(collection(db, "Shops"))
+            const shop = onSnapShop.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            const filteredShop = shop.filter(shop => shop.id === auth.currentUser.uid)
+
+            setShop(filteredShop[0] || null)
+        }
+        fetchData()
+    }, [])
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, "Contacts"), (snapshot) => {
@@ -102,7 +114,7 @@ export default function ChatWindow({ userData }) {
             await setDoc(doc(contactsRef), {
                 user_id: selectedContact.contact_id,
                 contact_id: auth.currentUser.uid,
-                name: userData?.role === "Event Planner" ? userData.first_name : selectedContact.name,
+                name: userData?.role === "Event Planner" ? userData.first_name : shop.supplier_name,
                 last_message: "",
                 isActive: false,
                 created_at: serverTimestamp()
@@ -110,7 +122,7 @@ export default function ChatWindow({ userData }) {
 
             console.log("test")
         };
-        
+
         setMessage('');
 
         await addDoc(collection(db, "Messages"), {
@@ -119,11 +131,11 @@ export default function ChatWindow({ userData }) {
             text: message,
             timestamp: serverTimestamp()
         });
-        
+
         setIsSending(false)
     }
 
-    console.log(messages)
+    console.log(selectedContact)
 
     return (
         <>
