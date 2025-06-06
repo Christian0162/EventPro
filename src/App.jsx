@@ -43,7 +43,7 @@ function App() {
 
                     if (docSnap.exists()) {
                         setUserData(docSnap.data());
-                    } 
+                    }
 
                     else {
                         console.warn("No user data found");
@@ -54,7 +54,7 @@ function App() {
                     setUserData(null);
                 }
             } catch (error) {
-                
+
                 console.error("Error in auth state change:", error);
                 setUser(null);
                 setUserData(null);
@@ -125,7 +125,7 @@ function App() {
 
                             <Route path="/events/edit/:id" element={user ?
                                 <AuthLayout user={user} userData={userData}>
-                                    <EditEvent user={user} />
+                                    <EditEvent user={user} userData={userData} />
                                 </AuthLayout> : <Navigate to={'/login'} />}></Route>
 
                             <Route path="/suppliers" element={user ?

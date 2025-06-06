@@ -11,6 +11,7 @@ import { ClipLoader } from "react-spinners";
 import useEvents from "../../hooks/useEvents";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import EventModal from "../../components/EventModal";
 
 export default function Event({ userData }) {
 
@@ -145,7 +146,7 @@ export default function Event({ userData }) {
         }
     }
 
-    console.log(supplierData)
+    console.log(userEvents)
     return (
         <>
             <Title>Event</Title>
@@ -194,10 +195,13 @@ export default function Event({ userData }) {
                                 <div className="group transition-all duration-200 h-full w-full border-1 border-gray-200 hover:shadow-2xl hover:-translate-y-3 p-6 rounded-lg mt-6 ">
                                     <div className="flex justify-between">
                                         {events.user_id !== auth.currentUser.uid && (
-                                            <div className="relative">
+                                            <div className="relative flex items-center gap-2">
+                                                <EventModal eventData={events} />
+
                                                 <button onClick={(e) => handleChat(e, events.user_id, events.event_name)} className='group'>
                                                     <MessageCircleMore className="trasition-all duration-200 text-gray-400 group-hover:text-blue-600" size={21} />
                                                 </button>
+
                                             </div>
                                         )}
 
@@ -229,7 +233,7 @@ export default function Event({ userData }) {
                                         {/* event budget */}
                                         <div className="flex space-x-2 items-center gap-2">
                                             <span className="rounded-xl bg-yellow-200 h-10 w-10 flex items-center justify-center text-yellow-600"><CircleDollarSign /></span>
-                                            <span className="font-bold text-gray-900">{events.event_budget} $</span>
+                                            <span className="font-bold text-gray-900">₱ {events.event_budget}</span>
                                         </div>
 
                                         {/* event suppliers */}
@@ -252,7 +256,9 @@ export default function Event({ userData }) {
                                             )}
 
                                             {userData.role === "Supplier" && (
-                                                <button onClick={() => handleApply(events.id)} disabled={applications.some(app => app.event_id === events.id)} className={`block text-center mt-5 py-3 w-full ${applications.some(app => app.event_id === events.id) ? 'bg-blue-300' : 'bg-blue-600 hover:bg-blue-700'} text-white font-bold rounded-lg`}>{applications.find(app => app.event_id === events.id)?.status || 'Apply'}</button>
+                                                <button onClick={() => handleApply(events.id)} disabled={applications.find(app => app.event_id === events.id)?.status === "Pending" || applications.find(app => app.event_id === events.id)?.status === "Approved"} className={`block text-center mt-5 py-3 w-full ${applications.find(app => app.event_id === events.id)?.status === "Pending" || applications.find(app => app.event_id === events.id)?.status === "Approved" ? 'bg-blue-300' : 'bg-blue-600 hover:bg-blue-700'} text-white font-bold rounded-lg`}>
+                                                    {applications.find(app => app.event_id === events.id)?.status === "Pending" ? 'Pending' : applications.find(app => app.event_id === events.id)?.status === "Approved" ? 'Approved' : 'Apply'}
+                                                </button>
                                             )}
                                         </div>
                                     </div>
