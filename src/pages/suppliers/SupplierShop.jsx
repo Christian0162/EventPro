@@ -1,6 +1,6 @@
 import { MapPin, CircleCheckBig, Star, Mail, Phone, Clock7, CircleCheck, DollarSign, Edit3, X } from "lucide-react"
 import ShopCards from "../../components/ShopCards"
-import SupplierRegistration from "../../components/SupplierRegistration"
+import SupplierRegistration from "./SupplierRegistration"
 import { updateDoc, doc, getDocs, collection } from "firebase/firestore"
 import { db } from "../../firebase/firebase"
 import { auth } from "../../firebase/firebase"
@@ -117,7 +117,9 @@ export default function SupplierShop() {
                                     </form>
                                 </div>
                             </ShopBackgroundModal>
-                            <img src={shop?.supplier_background_image} className="absolute inset-0" alt="background image" />
+                            {shop.supplier_background_image && (
+                                <img src={shop?.supplier_background_image} className="absolute inset-0 " alt="background image" />
+                            )}
                         </div>
 
                         <div className="p-8 md:p-10">

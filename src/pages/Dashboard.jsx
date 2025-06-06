@@ -5,9 +5,10 @@ import Loading from "../components/Loading";
 
 export default function Dashboard({ user, userData }) {
 
-    if (!userData) {
+    if (!user || !userData) {
         return <Loading />
     }
+    
     else {
         switch (userData.role) {
             case 'Supplier':

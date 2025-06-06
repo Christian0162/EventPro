@@ -15,12 +15,12 @@ export default function AdminDashboard() {
         const fetchingData = async () => {
 
             setIsLoading(true)
-            const snapAllUsers = await getDocs(collection(db, "Shops"))
-            const allUsers = snapAllUsers.docs.map(data => ({ id: data.id, ...data.data() }))
-            const snapData = await getDocs(collection(db, "ShopVerification"))
-            const verification_data = snapData.docs.map(data => {
-
-                const matchedUser = allUsers.find(user => user.id === data.id)
+            const snapShotShop = await getDocs(collection(db, "Shops"))
+            const allShop = snapShotShop.docs.map(data => ({ id: data.id, ...data.data() }))
+            
+            const snapShotVerification = await getDocs(collection(db, "ShopVerification"))
+            const verification_data = snapShotVerification.docs.map(data => {
+                const matchedUser = allShop.find(user => user.id === data.id)
 
                 if (matchedUser?.isApproved === "pending") {
                     return {

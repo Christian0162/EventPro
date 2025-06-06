@@ -1,22 +1,24 @@
 import { Link } from "react-router-dom";
 import { Navigation } from "swiper/modules";
 import { Title } from "react-head";
-import { CalendarDays, MapPin, CircleDollarSign, Trash, Users } from "lucide-react";
+import { CalendarDays, MapPin, CircleDollarSign, Trash, Users, MessageCircleMore } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
-import { db } from "../../firebase/firebase";
-import { auth } from "../../firebase/firebase";
+import { db, auth } from "../../firebase/firebase";
 import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, serverTimestamp, addDoc, query, where, getDoc, doc, getDocs } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import useEvents from "../../hooks/useEvents";
-
-
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 export default function Event({ userData }) {
 
     const [userEvents, setUserEvents] = useState([]);
     const [loading, setLoading] = useState(true)
+    const [applications, setApplications] = useState([])
+    const [supplierData, setSupplierData] = useState({})
+    const navigate = useNavigate()
     const { deleteEvent } = useEvents()
 
 
@@ -26,7 +28,7 @@ export default function Event({ userData }) {
         const unsubscribe = onSnapshot(eventRef, (querySnapShot) => {
             const data = querySnapShot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
             if (userData.role == "Event Planner") {
-                const filteredData = data.filter(event => event.uid === auth.currentUser.uid)
+                const filteredData = data.filter(event => event.user_id === auth.currentUser.uid)
                 setUserEvents(filteredData)
             }
             else {
@@ -44,113 +46,220 @@ export default function Event({ userData }) {
 
     }, [userData])
 
+    useEffect(() => {
+
+        const q = query(collection(db, "Applications"),
+            where("user_id", "==", auth.currentUser.uid))
+
+        const unsubscribe = onSnapshot(q, (onsnapshot) => {
+            const applications = onsnapshot.docs.map(app => ({ id: app.id, ...app.data() }))
+            setApplications(applications)
+        })
+
+        return () => unsubscribe()
+
+    }, [])
+
     const handleDelete = async (id) => {
         deleteEvent(id, setUserEvents)
     }
 
-    console.log(userData)
+    const handleApply = async (event_id) => {
+
+        Swal.fire({
+            title: 'Confirm Application',
+            text: "Are you sure you want to apply for this event?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Apply',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await addDoc(collection(db, "Applications"), {
+                        user_id: auth.currentUser.uid,
+                        event_id: event_id,
+                        AppliedAt: serverTimestamp(),
+                        status: 'Pending'
+                    })
+
+                    Swal.fire('Applied!', 'Your application has been submitted.', 'success');
+                }
+                catch (e) {
+
+                    Swal.fire('Error!', 'Failed to apply. Please try again.', 'error');
+                    console.error("Apply error:", e);
+                }
+            }
+        });
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const fetchShop = await getDoc(doc(db, "Shops", auth.currentUser.uid))
+
+            if (fetchShop.exists()) {
+                setSupplierData({ ...fetchShop.data(), id: fetchShop.id })
+            }
+
+        }
+        fetchData()
+    }, [])
+
+    const handleChat = async (e, event_id, event_name) => {
+        e.preventDefault()
+
+        const q = query(collection(db, "Contacts"),
+            where("user_id", "==", auth.currentUser?.uid),
+            where("contact_id", "==", supplierData?.id)
+        )
+
+        const querySnapShot = await getDocs(q)
+
+        if (querySnapShot.empty) {
+            console.log('test')
+            await addDoc(collection(db, "Contacts"), {
+                user_id: auth.currentUser.uid,
+                contact_id: event_id,
+                name: event_name,
+                avatar: event_name.slice(0, 1).toUpperCase(),
+                last_message: "",
+                isActive: false,
+                createdAt: serverTimestamp()
+            })
+
+            navigate(`/chats/${supplierData.id}`)
+        }
+        else {
+            console.log('wa ni gana')
+
+        }
+    }
+
+    console.log(supplierData)
     return (
         <>
             <Title>Event</Title>
 
+            {loading && (
+                <div className="absolute top-95 lg:top-85 left-0 right-0 flex items-center justify-center">
+                    <ClipLoader size={55} color="#1d5cc7" />
+                </div>
+            )}
+
             <div className="flex justify-between md:items-center lg:items-center flex-col lg:flex-row md:flex-row">
                 <div className="flex flex-col">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Events</h1>
-                    <span className="mt-2 text-gray-600">Create and manage your events in one place</span>
+
+                    {userEvents.length === 0 && (
+                        <span className="mt-2 text-gray-600">Create and manage your events in one place</span>
+                    )}
                 </div>
-                <Link to={'/events/create'}>
-                    <button className="bg-blue-600 text-white rounded-md px-5 lg:px-10 md:px-8 sm:px-7 py-2 lg:py-3 font-bold mt-3">Create New Event</button>
-                </Link>
+
+                {userData.role === "Event Planner" && (
+                    <Link to={'/events/create'}>
+                        <button className="bg-blue-600 text-white rounded-md px-5 lg:px-10 md:px-8 sm:px-7 py-2 lg:py-3 font-bold mt-3">Create New Event</button>
+                    </Link>
+                )}
+
             </div>
-            {loading
-                ?
-                (
-                    <div className="absolute top-95 lg:top-85 left-0 right-0 flex items-center justify-center">
-                        <ClipLoader size={55} color="#1d5cc7" />
-                    </div>
-                )
-                :
-                userEvents.length > 0
-                    ?
-                    (
-                        <div>
-                            <Swiper
-                                modules={[Navigation]}
-                                slidesPerView={1}
-                                navigation
-                                spaceBetween={30}
-                                breakpoints={{
-                                    640: { slidesPerView: 1 },
-                                    950: { slidesPerView: 2 },
-                                    1250: { slidesPerView: 3 },
-                                }}
+
+            {userEvents.length > 0 && (
+                <div>
+                    <Swiper
+                        modules={[Navigation]}
+                        slidesPerView={1}
+                        navigation
+                        spaceBetween={30}
+                        breakpoints={{
+                            640: { slidesPerView: 1 },
+                            950: { slidesPerView: 2 },
+                            1250: { slidesPerView: 3 },
+                        }}
+                    >
+                        {userEvents.map((events, index) => (
+                            <SwiperSlide
+                                key={index}
                             >
-                                {userEvents.map((events, index) => (
-                                    <SwiperSlide
-                                        key={index}
-                                    >
-                                        {/* event cards */}
-                                        <div className="group transition-all duration-200 h-full w-full border-1 border-gray-200 hover:shadow-2xl hover:-translate-y-3 p-6 rounded-lg mt-6 ">
-                                            <div className="flex justify-end">
-                                                <button onClick={() => handleDelete(events.id)} className="self-end transition-all duration-200 opacity-0 group-hover:opacity-100 active:text-violet-600"><Trash width={24} height={24} strokeWidth={2} /></button>
+                                {/* event cards */}
+                                <div className="group transition-all duration-200 h-full w-full border-1 border-gray-200 hover:shadow-2xl hover:-translate-y-3 p-6 rounded-lg mt-6 ">
+                                    <div className="flex justify-between">
+                                        {events.user_id !== auth.currentUser.uid && (
+                                            <div className="relative">
+                                                <button onClick={(e) => handleChat(e, events.user_id, events.event_name)} className='group'>
+                                                    <MessageCircleMore className="trasition-all duration-200 text-gray-400 group-hover:text-blue-600" size={21} />
+                                                </button>
                                             </div>
+                                        )}
 
-                                            {/* event name */}
-                                            <div className="flex justify-between items-center mb-7 mt-3">
-                                                <span className="block text-3xl font-bold text-gray-900">{events.event_name.length > 10 ? events.event_name.slice(0, 10) + ".." : events.event_name}</span>
-                                                <span className={`${events.event_status.value === "upcoming" ? "bg-purple-600" : events.event_status.value === "planning" ? "bg-sky-500" : "bg-green-500"} rounded-full shadow-lg py-1 px-5 text-white`}>{events.event_status.value}</span>
-                                            </div>
-
-                                            {/* event date and time */}
-                                            <div className="flex flex-col space-y-5">
-                                                <div className="flex space-x-2 items-center gap-2">
-                                                    <span className="rounded-xl bg-blue-200 h-10 w-10 flex items-center justify-center text-blue-600"><CalendarDays /></span>
-                                                    <span className="text-gray-900 font-bold">{events?.event_date?.date_preview?.join(", ")}
-                                                        <br></br> {events?.event_time?.previewStartAndEnd}</span>
-                                                </div>
-
-                                                {/* event location */}
-                                                <div className="flex space-x-2 items-center gap-2">
-                                                    <span className="rounded-xl bg-green-200 h-10 w-10 flex items-center justify-center text-green-600"><MapPin /></span>
-                                                    <span className="text-gray-700">{events.event_location}</span>
-                                                </div>
-
-                                                {/* event budget */}
-                                                <div className="flex space-x-2 items-center gap-2">
-                                                    <span className="rounded-xl bg-yellow-200 h-10 w-10 flex items-center justify-center text-yellow-600"><CircleDollarSign /></span>
-                                                    <span className="font-bold text-gray-900">{events.event_budget} $</span>
-                                                </div>
-
-                                                {/* event suppliers */}
-                                                <div>
-                                                    <div className="flex gap-2 items-center mb-5">
-                                                        <Users className="text-gray-600 h-5 w-5" />
-                                                        <span className="text-md text-gray-800">Looking for supplier:</span>
-                                                    </div>
-                                                    <div className="grid grid-cols-3 gap-5 mt-2">
-                                                        {events.event_categories.map((categories, index) => (
-                                                            <span key={index} className="text-center items-center w-26 py-1 rounded-full text-sm font-medium bg-gray-300 text-gray-500">{categories}</span>
-                                                        ))}
-                                                    </div>
-
-                                                    {/* description */}
-                                                    <p className="mt-5 text-gray-800 break-wordsrounded-lg px-2 mb-5">{events.event_description.length > 1 ? events.event_description : "No description provided"}</p>
-                                                    <Link to={`/events/edit/${events.id}`} className="block text-center mt-5 py-3 w-full bg-blue-600 text-white font-bold rounded-lg">{userData?.role === 'Supplier' ? 'Apply' : 'Manage Event'}</Link>
-                                                </div>
-                                            </div>
+                                        <div className={`${events.user_id !== auth.currentUser.uid ? 'relative' : 'ml-auto'}`}>
+                                            <button onClick={() => handleDelete(events.id)} className="self-end transition-all duration-200 opacity-0 group-hover:opacity-100 active:text-violet-600"><Trash width={24} height={24} strokeWidth={2} /></button>
                                         </div>
-                                    </SwiperSlide>
-                                ))}
-                            </Swiper>
-                        </div>
-                    )
-                    :
-                    (
-                        <div className="absolute top-90 lg:top-85 left-0 right-0 flex items-center justify-center">
-                            <span className="block text-gray-500 text-2xl">No events.</span>
-                        </div>
-                    )
-            }
+                                    </div>
+
+                                    {/* event name */}
+                                    <div className="flex justify-between items-center mb-7 mt-3">
+                                        <span className="block text-3xl font-bold text-gray-900">{events.event_name.length > 10 ? events.event_name.slice(0, 10) + ".." : events.event_name}</span>
+                                        <span className={`${events.event_status.value === "upcoming" ? "bg-purple-600" : events.event_status.value === "planning" ? "bg-sky-500" : "bg-green-500"} rounded-full shadow-lg py-1 px-5 text-white`}>{events.event_status.value}</span>
+                                    </div>
+
+                                    {/* event date and time */}
+                                    <div className="flex flex-col space-y-5">
+                                        <div className="flex space-x-2 items-center gap-2">
+                                            <span className="rounded-xl bg-blue-200 h-10 w-10 flex items-center justify-center text-blue-600"><CalendarDays /></span>
+                                            <span className="text-gray-900 font-bold">{events?.event_date?.date_preview?.join(", ")}
+                                                <br></br> {events?.event_time?.previewStartAndEnd}</span>
+                                        </div>
+
+                                        {/* event location */}
+                                        <div className="flex space-x-2 items-center gap-2">
+                                            <span className="rounded-xl bg-green-200 h-10 w-10 flex items-center justify-center text-green-600"><MapPin /></span>
+                                            <span className="text-gray-700">{events.event_location}</span>
+                                        </div>
+
+                                        {/* event budget */}
+                                        <div className="flex space-x-2 items-center gap-2">
+                                            <span className="rounded-xl bg-yellow-200 h-10 w-10 flex items-center justify-center text-yellow-600"><CircleDollarSign /></span>
+                                            <span className="font-bold text-gray-900">{events.event_budget} $</span>
+                                        </div>
+
+                                        {/* event suppliers */}
+                                        <div>
+                                            <div className="flex gap-2 items-center mb-5">
+                                                <Users className="text-gray-600 h-5 w-5" />
+                                                <span className="text-md text-gray-800">Looking for supplier:</span>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-5 mt-2">
+                                                {events.event_categories.map((categories, index) => (
+                                                    <span key={index} className="text-center items-center w-26 py-1 rounded-full text-sm font-medium bg-gray-300 text-gray-500">{categories}</span>
+                                                ))}
+                                            </div>
+
+                                            {/* description */}
+
+                                            <p className="mt-5 text-gray-800 break-wordsrounded-lg px-2 mb-5">{events.event_description.length > 1 ? events.event_description : "No description provided"}</p>
+                                            {userData.role === "Event Planner" && (
+                                                <Link to={`/events/edit/${events.id}`} className="block text-center mt-5 py-3 w-full bg-blue-600 text-white font-bold rounded-lg">Manage Event</Link>
+                                            )}
+
+                                            {userData.role === "Supplier" && (
+                                                <button onClick={() => handleApply(events.id)} disabled={applications.some(app => app.event_id === events.id)} className={`block text-center mt-5 py-3 w-full ${applications.some(app => app.event_id === events.id) ? 'bg-blue-300' : 'bg-blue-600 hover:bg-blue-700'} text-white font-bold rounded-lg`}>{applications.find(app => app.event_id === events.id)?.status || 'Apply'}</button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </div>
+            )}
+
+            {!loading && userEvents.length === 0 && (
+                <div className="absolute top-90 lg:top-85 left-0 right-0 flex items-center justify-center">
+                    <span className="block text-gray-500 text-2xl">No events.</span>
+                </div>
+            )}
         </>
     );
 };

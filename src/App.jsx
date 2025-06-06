@@ -34,24 +34,35 @@ function App() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                setUser(user)
-                const userDocRef = doc(db, "Users", user.uid);
-                const docSnap = await getDoc(userDocRef);
-                setUserData(docSnap.data());
-                setIsLoading(false);
-                return;
-            }
-            else {
+            try {
+                setIsLoading(true);
+                if (user) {
+                    setUser(user);
+                    const userDocRef = doc(db, "Users", user.uid);
+                    const docSnap = await getDoc(userDocRef);
+
+                    if (docSnap.exists()) {
+                        setUserData(docSnap.data());
+                    } 
+
+                    else {
+                        console.warn("No user data found");
+                        setUserData(null);
+                    }
+                } else {
+                    setUser(null);
+                    setUserData(null);
+                }
+            } catch (error) {
+                console.error("Error in auth state change:", error);
                 setUser(null);
-                setUserData(null)
-
+                setUserData(null);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
-        })
-
-        return () => unsubscribe(); 
-    }, [])
+        });
+        return () => unsubscribe();
+    }, [user])
 
     if (isLoading) {
         return <Loading />
@@ -130,7 +141,13 @@ function App() {
                                     <Favorites user={user} userData={userData} />
                                 </AuthLayout> : <Navigate to={'/login'} />}></Route>
 
-                            <Route path="/chat" element={user ?
+                            <Route path="/chats" element={user ? (
+                                <AuthLayout user={user} userData={userData}>
+                                    <ChatWindow user={user} userData={userData} />
+                                </AuthLayout>
+                            ) : <Navigate to="/login" />} />
+
+                            <Route path="/chats/:id" element={user ?
                                 <AuthLayout user={user} userData={userData}>
                                     <ChatWindow user={user} userData={userData} />
                                 </AuthLayout> : <Navigate to={'/login'} />}></Route>

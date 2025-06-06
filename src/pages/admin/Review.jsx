@@ -1,5 +1,5 @@
 import { db } from "../../firebase/firebase";
-import { getDoc, doc, updateDoc } from "firebase/firestore";
+import { getDoc, doc, updateDoc, collection, addDoc, Timestamp, deleteDoc } from "firebase/firestore";
 import { Navigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react"
 import { IdCard } from "lucide-react";
@@ -50,9 +50,24 @@ export default function Review() {
 
         try {
             if (result.isConfirmed) {
+
                 setIsLoading(true)
+
                 await updateDoc(doc(db, 'Shops', id), {
                     isApproved: "verified"
+                })
+
+                await updateDoc(doc(db, 'ShopVerification', id), {
+                    isApproved: "verified"
+                })
+
+                await addDoc(collection(db, "Notifications"), {
+                    user_id: id,
+                    avatar: 'A',
+                    title: 'Your Verification Has Been approved!',
+                    message: "You're verified! Your business is now publicly visible to planners in the Suppliers directory!",
+                    timestamp: Timestamp.now(),
+                    unread: true
                 })
 
                 await Swal.fire({
@@ -71,6 +86,18 @@ export default function Review() {
                 await updateDoc(doc(db, 'Shops', id), {
                     isApproved: "unverified"
                 })
+
+                await deleteDoc(doc(db, 'ShopVerification', id))
+
+                await addDoc(collection(db, "Notifications"), {
+                    user_id: id,
+                    avatar: 'A',
+                    title: 'Your Verification Has Been Denied',
+                    message: "Unfortunately, your verification request was not approved. Please review your submission and try again.",
+                    timestamp: Timestamp.now(),
+                    unread: true
+                })
+                console.log('test')
 
                 await Swal.fire({
                     title: 'Success',

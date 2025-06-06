@@ -43,18 +43,18 @@ export default function HomePage({ user }) {
 
                             {/* Action Buttons */}
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <button
+                                <Link to={'/login'}
                                     className="group px-8 py-4 bg-white border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                                 >
                                     <span className="flex items-center justify-center">
-                                        <Link to={'/login'}>Login</Link>
+                                        Login
                                         <ChevronRight className={`ml-2 w-5 h-5 transition-transform duration-300 hover:translate-x-1`} />
                                     </span>
-                                </button>
+                                </Link>
 
-                                <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                                    <Link to={'/register'}>Register</Link>
-                                </button>
+                                <Link to={'/register'} className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                                    Register
+                                </Link>
                             </div>
 
                             {/* Features Preview */}

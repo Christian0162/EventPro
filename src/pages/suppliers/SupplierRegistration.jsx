@@ -1,12 +1,11 @@
 import { MapPin, Mail, Phone, Clock, DollarSign, Calendar } from 'lucide-react';
 import Select from 'react-select';
-import AddressAutocomplete from './AddressAutoComplete';
+import AddressAutocomplete from '../../components/AddressAutoComplete';
 import { useState } from 'react';
 import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase/firebase';
-import { auth } from '../firebase/firebase';
+import { db } from '../../firebase/firebase';
+import { auth } from '../../firebase/firebase';
 import Swal from 'sweetalert2';
-import { Navigate } from 'react-router-dom';
 
 export default function SupplierRegistration() {
 
@@ -91,6 +90,7 @@ export default function SupplierRegistration() {
             //     createdAt: serverTimestamp()
             // });
             setIsLoading(false)
+
             Swal.fire({
                 title: 'Success',
                 icon: 'success',
@@ -98,7 +98,8 @@ export default function SupplierRegistration() {
                 confirmButtonText: 'Ok'
             }).then((result) => {
                 if(result.isConfirmed) {
-                    return Navigate('/shop')
+                    console.log('test')
+                    window.location.reload();
                 }
             })
             

@@ -35,7 +35,7 @@ export default function NavBar({ user, userData }) {
                         ?
                         <div className="hidden sm:flex space-x-6 items-center">
                             <Link to="/favorites" className="hover:text-blue-600"><Heart size={20} /></Link>
-                            <Link to="/chat" className="hover:text-blue-600"><MessageCircleMore size={20} /></Link>
+                            <Link to="/chats" className="hover:text-blue-600"><MessageCircleMore size={20} /></Link>
                             <Link to="/notification" className="hover:text-blue-600"><BellDot size={20} /></Link>
                             <UserDropdown />
                         </div>
@@ -47,7 +47,7 @@ export default function NavBar({ user, userData }) {
                         </div>
                     }
 
-                    <DropDown />
+                    <DropDown user={user} />
                 </div>
             </nav>
         </>
