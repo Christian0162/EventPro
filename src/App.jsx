@@ -54,9 +54,11 @@ function App() {
                     setUserData(null);
                 }
             } catch (error) {
+                
                 console.error("Error in auth state change:", error);
                 setUser(null);
                 setUserData(null);
+
             } finally {
                 setIsLoading(false);
             }

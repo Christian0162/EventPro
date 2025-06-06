@@ -83,10 +83,12 @@ export default function SupplierModal({ supplierData }) {
                 last_message: "",
                 isActive: false,
                 createdAt: serverTimestamp()
-                
+
             })
             navigate(`/chats/${supplierData.id}`)
-
+        }
+        else {
+            navigate(`/chats/${supplierData.id}`)
         }
     }
 
