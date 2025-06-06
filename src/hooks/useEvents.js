@@ -9,7 +9,7 @@ export default function useEvents() {
 
     const createEvent = (user, event_name, event_location, event_date, event_time, event_status, type, event_budget, event_description, tags) => {
         addDoc(collection(db, "Events"), {
-            uid: user.uid,
+            user_id: user.uid,
             event_name: event_name,
             event_location: event_location,
             event_date: event_date,

@@ -16,14 +16,13 @@ export default function Favorites() {
 
 
     useEffect(() => {
-        setIsLoading(true);
+        setIsLoading(true)
 
         const unsubscribe = onSnapshot(collection(db, "Favorites"), (snapshot) => {
             const userFavorites = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-            const favorites = userFavorites.filter(doc => doc.event_id === auth.currentUser.uid)
+            const favorites = userFavorites.filter(doc => doc.user_id === auth.currentUser.uid)
 
             setFavorites(favorites);
-            setIsLoading(false)
         });
 
         return () => unsubscribe();
@@ -32,11 +31,12 @@ export default function Favorites() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setIsLoading(true);
+                setIsLoading(true)
 
                 if (favorites.length > 0) {
                     const snapShotShop = await getDocs(collection(db, "Shops"));
                     const shops = snapShotShop.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
                     const favoriteShop = shops.filter(shop =>
                         favorites.some(fav => fav.supplier_id === shop.id)
                     );
@@ -47,26 +47,36 @@ export default function Favorites() {
                             const reviewsSnapshot = await getDocs(collection(db, "Shops", shopItem.id, "Reviews"));
                             const reviews = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                             reviewsData[shopItem.id] = reviews;
+
                         } catch (error) {
                             console.log(`Error fetching reviews for shop ${shopItem.id}:`, error);
                             reviewsData[shopItem.id] = [];
                         }
                     }
-
+                    
                     setShopReviews(reviewsData);
                     setShop(favoriteShop);
+                    setIsLoading(false);
+
+                }
+                
+                else {
+                    setShop([])
+                    setShopReviews([])
                 }
 
-                setIsLoading(false);
             } catch (error) {
                 console.log('Error fetching data:', error);
+                setIsLoading(false);
+            }
+            finally {
                 setIsLoading(false);
             }
         };
 
         fetchData();
-    }, [favorites]);
 
+    }, [favorites]);
 
     const calculateAverageRating = (shopId) => {
         const reviews = shopReviews[shopId] || [];
@@ -85,20 +95,21 @@ export default function Favorites() {
         return reviews.length;
     };
 
-    console.log(shop)
+    console.log(favorites)
 
     return (
         <>
             <Title>Favorites</Title>
-
             {isLoading && (
                 <Loading />
             )}
 
-            <div className={`flex flex-col mb-5`}>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Favorites</h1>
-                <span className="mt-2 text-gray-600">Look at your favorite suppliers</span>
-            </div>
+            {!isLoading && (
+                <div className={`flex flex-col mb-5`}>
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Favorites</h1>
+                    <span className="mt-2 text-gray-600">Look at your favorite suppliers</span>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {shop.map((shopItem, index) => {

@@ -113,9 +113,6 @@ export default function Supplier() {
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             Suppliers
                         </h1>
-                        <p className="mt-3 text-lg text-gray-600">
-                            Discover amazing suppliers for your events
-                        </p>
                     </div>
                     <div className="hidden md:flex items-center space-x-4">
                         <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
@@ -127,7 +124,7 @@ export default function Supplier() {
                 </div>
 
                 {/* Search and Filter Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div>
                     <div className="flex flex-col md:flex-row gap-4">
                         {/* Search Bar */}
                         <div className="flex-1 relative">

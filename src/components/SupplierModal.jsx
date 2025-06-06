@@ -2,9 +2,13 @@ import { Button, Dialog, DialogPanel, } from '@headlessui/react'
 import { useEffect, useState } from 'react'
 import { MapPin, DollarSign, Clock, Phone, Mail, X, MessageCircleMore, Heart } from 'lucide-react'
 import { db, auth } from '../firebase/firebase'
-import { doc, addDoc, serverTimestamp, onSnapshot, collection, deleteDoc, where, query, getDocs } from 'firebase/firestore'
+import { doc, addDoc, where, serverTimestamp, onSnapshot, collection, deleteDoc, query, getDocs } from 'firebase/firestore'
+import { useNavigate } from 'react-router-dom'
 
 export default function SupplierModal({ supplierData }) {
+
+    const navigate = useNavigate()
+
     const [isOpen, setIsOpen] = useState(false)
     const [isLiked, setIsLiked] = useState(false)
 
@@ -21,7 +25,7 @@ export default function SupplierModal({ supplierData }) {
         const unsubscribe = onSnapshot(collection(db, "Favorites"),
             (snapshot) => {
                 const userFavorites = snapshot.docs
-                    .filter(doc => doc.data().event_id === auth.currentUser.uid && doc.data().supplier_id === supplierData.id)
+                    .filter(doc => doc.data().user_id === auth.currentUser.uid && doc.data().supplier_id === supplierData.id)
                     .map(doc => ({ id: doc.id, ...doc.data() }));
 
                 setIsLiked(userFavorites[0]?.isActive || false);
@@ -40,22 +44,49 @@ export default function SupplierModal({ supplierData }) {
 
         if (isLiked) {
             const q = query(collection(db, "Favorites"),
-                where("event_id", "==", auth.currentUser.uid),
+                where("user_id", "==", auth.currentUser.uid),
                 where("supplier_id", "==", supplierData.id)
             )
             const querySnapshot = await getDocs(q)
             querySnapshot.forEach(async (docSnapshot) => {
-                await deleteDoc(doc(db, "Favorites", docSnapshot.id))})
+                await deleteDoc(doc(db, "Favorites", docSnapshot.id))
+            })
             setIsLiked(false)
         }
         else {
             await addDoc(collection(db, "Favorites"), {
-                event_id: auth.currentUser.uid,
+                user_id: auth.currentUser.uid,
                 supplier_id: supplierData.id,
                 isActive: true,
                 createdAt: serverTimestamp(),
             })
             setIsLiked(true)
+        }
+    }
+
+    const handleChat = async (e) => {
+        e.preventDefault()
+
+        const q = query(collection(db, "Contacts"),
+            where("user_id", "==", auth.currentUser.uid),
+            where("contact_id", "==", supplierData.id)
+        )
+
+        const querySnapShot = await getDocs(q)
+
+        if (querySnapShot.empty) {
+            await addDoc(collection(db, "Contacts"), {
+                user_id: auth.currentUser.uid,
+                contact_id: supplierData.id,
+                name: supplierData.supplier_name,
+                avatar: supplierData.supplier_name.slice(0, 1).toUpperCase(),
+                last_message: "",
+                isActive: false,
+                createdAt: serverTimestamp()
+                
+            })
+            navigate(`/chats/${supplierData.id}`)
+
         }
     }
 
@@ -115,7 +146,7 @@ export default function SupplierModal({ supplierData }) {
                                     </div>
 
                                     <div className='flex gap-5'>
-                                        <div className="flex items-center space-x-2">
+                                        <div className="relative space-x-2">
                                             <form onSubmit={handleFavorites}>
                                                 <button className='group transparent'>
                                                     <Heart className={`transition-all duration-200 ${isLiked ? 'fill-red-600 opacity-100 text-red-600' : 'opacity-50 text-gray-800 group-hover:text-red-600 group-hover:opacity-60 group-hover:scale-115'}`} size={21} />
@@ -123,8 +154,8 @@ export default function SupplierModal({ supplierData }) {
                                             </form>
                                         </div>
 
-                                        <div className="flex items-center space-x-2">
-                                            <button className='group'>
+                                        <div className="relative space-x-2">
+                                            <button onClick={handleChat} className='group'>
                                                 <MessageCircleMore className="trasition-all duration-200 text-gray-400 group-hover:text-blue-600" size={21} />
                                             </button>
                                         </div>
@@ -183,23 +214,37 @@ export default function SupplierModal({ supplierData }) {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="flex gap-3 pt-4 border-t border-gray-100">
-                                    <Button
-                                        onClick={close}
-                                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                                    >
-                                        Close
-                                    </Button>
-                                    <Button
-                                        onClick={() => {
-                                            // Add booking logic here
-                                            console.log('Booking supplier:', supplierData.supplier_name);
-                                        }}
-                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    >
-                                        Book Now
-                                    </Button>
-                                </div>
+                                {supplierData.id !== auth.currentUser.uid && (
+                                    <div className="flex gap-3 pt-4 border-t border-gray-100">
+                                        <Button
+                                            onClick={close}
+                                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                        >
+                                            Close
+                                        </Button>
+                                        <Button
+                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        >
+                                            Book Now
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {supplierData.id === auth.currentUser.uid && (
+                                    <div className="flex gap-3 pt-4 border-t border-gray-100">
+                                        <Button
+                                            onClick={close}
+                                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                        >
+                                            Close
+                                        </Button>
+                                        <Button
+                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        >
+                                            Edit
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </DialogPanel>
                     </div>

@@ -7,6 +7,9 @@ import PrimaryButton from "../../components/PrimaryButton";
 import { Link } from "react-router-dom";
 import useEvents from "../../hooks/useEvents";
 import Loading from "../../components/Loading";
+import { addDoc, collection, doc, getDocs, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import Swal from "sweetalert2";
 
 export default function EditEvent() {
 
@@ -23,10 +26,10 @@ export default function EditEvent() {
     const [event_budget, setEvent_budget] = useState('')
     const [tags, setTags] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [applications, setApplications] = useState([])
+    const [suppliers, setSuppliers] = useState([])
 
     const { updateEvent, getEvent } = useEvents()
-
-    console.log(startTime)
 
     const categoriesOptions = [
         { label: 'Catering', value: 'catering' },
@@ -68,6 +71,31 @@ export default function EditEvent() {
     }
 
     useEffect(() => {
+        const q = query(collection(db, "Applications"),
+            where("event_id", "==", id))
+
+        const unsubscribe = onSnapshot(q, (onsnapshot) => {
+            const applications = onsnapshot.docs.map(app => ({ id: app.id, ...app.data() }))
+            setApplications(applications)
+        })
+
+        return () => unsubscribe()
+
+    }, [])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const snapShotShops = await getDocs(collection(db, "Shops"))
+            const shops = snapShotShops.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            const filteredShops = shops.filter(shop => applications.some(app => app.user_id === shop.id))
+
+            setSuppliers(filteredShops)
+        }
+        fetchData()
+    }, [applications])
+
+
+    useEffect(() => {
         const loadEvent = async () => {
             try {
                 setIsLoading(true)
@@ -81,7 +109,7 @@ export default function EditEvent() {
                     setEvent_type(data.event_type)
                     setEvent_budget(data.event_budget)
                     setEvent_description(data.event_description)
-                    setTags(data.event_categories)                    
+                    setTags(data.event_categories)
                     setStartTime(data.event_time.valueStartAndEnd[0])
                     setEndTime(data.event_time.valueStartAndEnd[1])
                 }
@@ -96,8 +124,6 @@ export default function EditEvent() {
             loadEvent()
         }
     }, [id])
-
-
 
     const handleDate = (e) => {
         const dateString = e.target.value;
@@ -149,6 +175,90 @@ export default function EditEvent() {
         return <Loading />
     }
 
+    const handleApprove = async (supplier_id) => {
+        Swal.fire({
+            title: 'Confirm Request',
+            text: 'This action will confirm the request and notify the user.',
+            icon: 'question',
+            confirmButtonText: 'Approve',
+            showCancelButton: true
+        }).then(async (result) => {
+
+            if (result.isConfirmed) {
+                // const snapShotApplications = await getDocs(collection(db, "Applications"))
+                // const applications = snapShotApplications.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                // const filteredApplications = applications.filter(app => app.user_id === supplier_id)
+
+                const q = query(collection(db, "Applications"),
+                    where("event_id", "==", id),
+                    where("user_id", "==", supplier_id))
+                const snapShotApplications = await getDocs(q)
+                const applications = snapShotApplications.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+
+                console.log(applications)
+
+                for (const app of applications) {
+                    const appRef = doc(db, "Applications", app.id);
+                    await updateDoc(appRef, {
+                        status: "Confirmed"
+                    });
+
+                    await addDoc(collection(db, "Notifications"), {
+                        user_id: app.user_id,
+                        avatar: 'A',
+                        title: 'Your application has been approved!',
+                        message: "The event you applied for has been approved.",
+                        timestamp: serverTimestamp(),
+                        unread: true
+                    });
+                }
+                Swal.fire('Success', 'The supplier has been approved and notified.', 'success')
+            }
+        })
+
+    }
+
+    const handleReject = async (supplier_id) => {
+        Swal.fire({
+            title: 'Confirm Request',
+            text: 'This action will confirm the request and notify the user.',
+            icon: 'question',
+            confirmButtonText: 'Approve',
+            showCancelButton: true
+        }).then(async (result) => {
+
+            if (result.isConfirmed) {
+                // const snapShotApplications = await getDocs(collection(db, "Applications"))
+                // const applications = snapShotApplications.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                // const filteredApplications = applications.filter(app => app.user_id === supplier_id)
+
+                const q = query(collection(db, "Applications"),
+                    where("event_id", "==", id),
+                    where("user_id", "==", supplier_id))
+                const snapShotApplications = await getDocs(q)
+                const applications = snapShotApplications.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+
+                console.log(applications)
+
+                for (const app of applications) {
+                    const appRef = doc(db, "Applications", app.id);
+                    await updateDoc(appRef, {
+                        status: "Confirmed"
+                    });
+
+                    await addDoc(collection(db, "Notifications"), {
+                        user_id: app.user_id,
+                        avatar: 'A',
+                        title: 'Your application has been approved!',
+                        message: "The event you applied for has been approved.",
+                        timestamp: serverTimestamp(),
+                        unread: true
+                    });
+                }
+                Swal.fire('Success', 'The supplier has been approved and notified.', 'success')
+            }
+        })
+    }
 
     return (
         <>
@@ -309,6 +419,77 @@ export default function EditEvent() {
                     </Link>
                 </div>
             </form>
+
+            {/* Event Suppliers Section */}
+            <div className="mt-8 space-y-4">
+                <h3 className="text-lg font-semibold">Event Suppliers</h3>
+
+                {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Confirmed")).length > 0 && (
+                    <div className="space-y-3">
+                        {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Confirmed")).map((supplier) => (
+                            <div key={supplier.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
+                                        {supplier.supplier_name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-gray-900">{supplier.supplier_name}</p>
+                                        <p className="text-sm text-gray-500 capitalize">{supplier.supplier_type.label}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Confirmed")).length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                        <p>No suppliers have applied for this event yet.</p>
+                    </div>
+                )}
+
+                {/* Suppliers who applied for this event - separate section */}
+                <div className="mt-6">
+                    <h4 className="text-md font-medium mb-3">Suppliers who applied for this event</h4>
+                    {suppliers.length > 0 && (
+                        <div className="space-y-3">
+                            {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Pending")).map((supplier) => (
+                                <div key={supplier.id} className="flex items-center justify-between p-4 bg-white rounded-lg border">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-white font-medium">
+                                            {supplier.supplier_name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-gray-900">{supplier.supplier_name}</p>
+                                            <p className="text-sm text-gray-500 capitalize">{supplier.supplier_type?.label}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            onClick={() => handleApprove(supplier.id)}
+                                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                                        >
+                                            Approve
+                                        </button>
+                                        <button
+                                            onClick={() => handleReject(supplier.id)}
+                                            className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
+                                        >
+                                            Reject
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Pending")).length === 0 && (
+                        <div className="text-center py-6 text-gray-500">
+                            <p>No new supplier applications for this event.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
         </>
     )
 }
