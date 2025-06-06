@@ -7,7 +7,7 @@ import { db } from "../../firebase/firebase";
 import Loading from "../../components/Loading";
 import SupplierModal from "../../components/SupplierModal";
 
-export default function Supplier() {
+export default function Supplier({ userData }) {
     const [category, setCategory] = useState(null);
     const [shop, setShop] = useState([]);
     const [filteredShops, setFilteredShops] = useState([]);
@@ -99,7 +99,7 @@ export default function Supplier() {
         setSearchTerm(e.target.value);
     };
 
-    
+
     console.log(filteredShops)
     return (
         <>
@@ -237,7 +237,7 @@ export default function Supplier() {
                                 </div>
 
                                 {/* Action Button */}
-                                <SupplierModal supplierData={shopItem} />
+                                <SupplierModal supplierData={shopItem} userData={userData.role} />
                             </div>
                         </Cards>
                     );

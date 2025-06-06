@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import AddressAutoComplete from "../../components/AddressAutoComplete";
 import Select from "react-select"
 import { X, MessageCircleMore } from "lucide-react";
@@ -8,10 +8,11 @@ import { Link } from "react-router-dom";
 import useEvents from "../../hooks/useEvents";
 import Loading from "../../components/Loading";
 import { addDoc, collection, doc, getDocs, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
-import { db, auth } from "../../firebase/firebase";
+import { db } from "../../firebase/firebase";
 import Swal from "sweetalert2";
+import SupplierModal from "../../components/SupplierModal";
 
-export default function EditEvent() {
+export default function EditEvent({ userData }) {
 
     const { id } = useParams();
     const [event_name, setEvent_name] = useState('')
@@ -28,7 +29,6 @@ export default function EditEvent() {
     const [isLoading, setIsLoading] = useState(false)
     const [applications, setApplications] = useState([])
     const [suppliers, setSuppliers] = useState([])
-    const navigate = useNavigate()
 
     const { updateEvent, getEvent } = useEvents()
 
@@ -251,43 +251,12 @@ export default function EditEvent() {
                     });
 
                 }
-                Swal.fire('Success', 'The supplier has been approved and notified.', 'success')
+                Swal.fire('Reject', 'The supplier has been rejected and notified.', 'success')
             }
         })
     }
 
-    const handleChat = async (e, supplier_id, supplier_name) => {
-        e.preventDefault()
-
-        const q = query(collection(db, "Contacts"),
-            where("user_id", "==", auth.currentUser?.uid),
-            where("contact_id", "==", supplier_id)
-        )
-
-        const querySnapShot = await getDocs(q)
-
-        if (querySnapShot.empty) {
-            console.log('test')
-            await addDoc(collection(db, "Contacts"), {
-                user_id: auth.currentUser.uid,
-                contact_id: supplier_id,
-                name: supplier_name,
-                avatar: supplier_name.slice(0, 1).toUpperCase(),
-                last_message: "",
-                isActive: false,
-                createdAt: serverTimestamp()
-            })
-
-            navigate(`/chats/`)
-        }
-        else {
-            console.log('wa ni gana')
-            navigate(`/chats/}`)
-
-        }
-    }
-
-    console.log(suppliers)
+    console.log(userData)
 
     return (
         <>
@@ -376,7 +345,7 @@ export default function EditEvent() {
                 {/* Budget */}
                 <div className="flex flex-col w-full">
                     <label htmlFor="type">Budget</label>
-                    <input placeholder="25,500" type="text" name="event_budget" className="mt-2 focus:ring-2 focus:outline-none px-5 focus:ring-blue-500 ring-1 rounded-sm w-full h-8 ring-black"
+                    <input placeholder="₱ 25,500" type="text" name="event_budget" className="mt-2 focus:ring-2 focus:outline-none px-5 focus:ring-blue-500 ring-1 rounded-sm w-full h-8 ring-black"
                         required
                         onChange={(e) => setEvent_budget(e.target.value)}
                         value={event_budget}
@@ -453,9 +422,9 @@ export default function EditEvent() {
             <div className="mt-8 space-y-4">
                 <h3 className="text-lg font-semibold">Event Suppliers</h3>
 
-                {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Confirmed")).length > 0 && (
+                {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Approved")).length > 0 && (
                     <div className="space-y-3">
-                        {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Confirmed")).map((supplier) => (
+                        {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Approved")).map((supplier) => (
                             <div key={supplier.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
@@ -466,15 +435,18 @@ export default function EditEvent() {
                                         <p className="text-sm text-gray-500 capitalize">{supplier.supplier_type.label}</p>
                                     </div>
                                 </div>
-                                <button onClick={(e) => handleChat(e, supplier.id, supplier.supplier_name)} className='group'>
-                                    <MessageCircleMore className="trasition-all duration-200 text-gray-400 group-hover:text-blue-600" size={21} />
-                                </button>
+                                <div className="flex items-center text-sm gap-3">
+                                    <div>
+                                        <SupplierModal supplierData={supplier} applications={applications} userData={userData.role} />
+
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
                 )}
 
-                {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Confirmed")).length === 0 && (
+                {suppliers.filter(supplier => applications.some(app => app.user_id === supplier.id && app.status === "Approved")).length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                         <p>No suppliers have applied for this event yet.</p>
                     </div>

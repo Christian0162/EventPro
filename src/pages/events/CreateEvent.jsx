@@ -225,7 +225,7 @@ export default function CreateEvent() {
                 {/* Budget */}
                 <div className="flex flex-col w-full">
                     <label htmlFor="type">Budget</label>
-                    <input placeholder="25,500" type="text" name="event_budget" className="mt-2 focus:ring-2 focus:outline-none px-5 focus:ring-blue-500 ring-1 rounded-sm w-full h-8 ring-black"
+                    <input placeholder="₱ 25,500" type="text" name="event_budget" className="mt-2 focus:ring-2 focus:outline-none px-5 focus:ring-blue-500 ring-1 rounded-sm w-full h-8 ring-black"
                         required
                         onChange={(e) => setEvent_budget(e.target.value)}
                         value={event_budget}

@@ -5,7 +5,7 @@ import { db, auth } from '../firebase/firebase'
 import { doc, addDoc, where, serverTimestamp, onSnapshot, collection, deleteDoc, query, getDocs } from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom'
 
-export default function SupplierModal({ supplierData }) {
+export default function SupplierModal({ supplierData, applications, userData }) {
 
     const navigate = useNavigate()
 
@@ -85,10 +85,10 @@ export default function SupplierModal({ supplierData }) {
                 createdAt: serverTimestamp()
 
             })
-            navigate(`/chats/${supplierData.id}`)
+            navigate(`/chats/`)
         }
         else {
-            navigate(`/chats/${supplierData.id}`)
+            navigate(`/chats/`)
         }
     }
 
@@ -224,11 +224,14 @@ export default function SupplierModal({ supplierData }) {
                                         >
                                             Close
                                         </Button>
-                                        <Button
-                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                        >
-                                            Book Now
-                                        </Button>
+
+                                        {applications?.some(app => app.user_id === supplierData.id) ||userData === "Event Planner" && (
+                                            <Button
+                                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                            >
+                                                Book Now
+                                            </Button>
+                                        )}
                                     </div>
                                 )}
 
