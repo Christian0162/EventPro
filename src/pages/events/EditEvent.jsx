@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AddressAutoComplete from "../../components/AddressAutoComplete";
 import Select from "react-select"
-import { X } from "lucide-react";
+import { X, MessageCircleMore  } from "lucide-react";
 import PrimaryButton from "../../components/PrimaryButton";
 import { Link } from "react-router-dom";
 import useEvents from "../../hooks/useEvents";
 import Loading from "../../components/Loading";
 import { addDoc, collection, doc, getDocs, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
+import { db, auth } from "../../firebase/firebase";
 import Swal from "sweetalert2";
 
 export default function EditEvent() {
@@ -28,6 +28,7 @@ export default function EditEvent() {
     const [isLoading, setIsLoading] = useState(false)
     const [applications, setApplications] = useState([])
     const [suppliers, setSuppliers] = useState([])
+    const navigate = useNavigate()
 
     const { updateEvent, getEvent } = useEvents()
 
@@ -260,6 +261,39 @@ export default function EditEvent() {
         })
     }
 
+    const handleChat = async (e, supplier_id, supplier_name) => {
+        e.preventDefault()
+
+        const q = query(collection(db, "Contacts"),
+            where("user_id", "==", auth.currentUser?.uid),
+            where("contact_id", "==", supplier_id)
+        )
+
+        const querySnapShot = await getDocs(q)
+
+        if (querySnapShot.empty) {
+            console.log('test')
+            await addDoc(collection(db, "Contacts"), {
+                user_id: auth.currentUser.uid,
+                contact_id: supplier_id,
+                name: supplier_name,
+                avatar: supplier_name.slice(0, 1).toUpperCase(),
+                last_message: "",
+                isActive: false,
+                createdAt: serverTimestamp()
+            })
+
+            navigate(`/chats/`)
+        }
+        else {
+            console.log('wa ni gana')
+            navigate(`/chats/}`)
+
+        }
+    }
+
+    console.log(suppliers)
+
     return (
         <>
             <form onSubmit={handleSubmit} className="w-full h-full mt-5 space-y-5">
@@ -437,6 +471,9 @@ export default function EditEvent() {
                                         <p className="text-sm text-gray-500 capitalize">{supplier.supplier_type.label}</p>
                                     </div>
                                 </div>
+                                <button onClick={(e) => handleChat(e, supplier.id, supplier.supplier_name)} className='group'>
+                                    <MessageCircleMore className="trasition-all duration-200 text-gray-400 group-hover:text-blue-600" size={21} />
+                                </button>
                             </div>
                         ))}
                     </div>

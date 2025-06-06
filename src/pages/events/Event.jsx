@@ -112,8 +112,15 @@ export default function Event({ userData }) {
 
         const q = query(collection(db, "Contacts"),
             where("user_id", "==", auth.currentUser?.uid),
-            where("contact_id", "==", supplierData?.id)
+            where("contact_id", "==", event_id)
         )
+
+        // const contactsRef = collection(db, "Contacts");
+
+        //         const q = query(contactsRef,
+        //             where("user_id", "==", selectedContact.contact_id),
+        //             where("contact_id", "==", auth.currentUser.uid)
+        //         );
 
         const querySnapShot = await getDocs(q)
 
@@ -133,6 +140,7 @@ export default function Event({ userData }) {
         }
         else {
             console.log('wa ni gana')
+            navigate(`/chats/${supplierData.id}`)
 
         }
     }
