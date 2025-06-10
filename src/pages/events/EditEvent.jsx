@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import useEvents from "../../hooks/useEvents";
 import Loading from "../../components/Loading";
 import { addDoc, collection, doc, getDocs, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
+import { auth, db } from "../../firebase/firebase";
 import Swal from "sweetalert2";
 import SupplierModal from "../../components/SupplierModal";
 
@@ -29,6 +29,7 @@ export default function EditEvent({ userData }) {
     const [isLoading, setIsLoading] = useState(false)
     const [applications, setApplications] = useState([])
     const [suppliers, setSuppliers] = useState([])
+    const [reviews, setReviews] = useState([])
 
     const { updateEvent, getEvent } = useEvents()
 
@@ -101,6 +102,10 @@ export default function EditEvent({ userData }) {
             try {
                 setIsLoading(true)
                 const data = await getEvent(id);
+                const snapShotReview = await getDocs(collection(db, "Shops", auth.currentUser.uid, "Reviews"));
+                const review = snapShotReview.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+
+                setReviews(review)
 
                 if (data) {
                     setEvent_name(data.event_name)
@@ -255,6 +260,14 @@ export default function EditEvent({ userData }) {
             }
         })
     }
+
+    const validRatings = reviews
+        .map(review => Number(review.rating))
+        .filter(rating => !isNaN(rating));
+
+    const averageRating = validRatings.length > 0
+        ? (validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length).toFixed(1)
+        : "N/A";
 
     console.log(userData)
 
@@ -437,8 +450,8 @@ export default function EditEvent({ userData }) {
                                 </div>
                                 <div className="flex items-center text-sm gap-3">
                                     <div>
-                                        <SupplierModal supplierData={supplier} applications={applications} userData={userData.role} />
 
+                                        <SupplierModal className={'px-4 py-1 text-sm rounded-md'} supplierData={supplier} applications={applications} userData={userData.role} reviews={reviews} averageRating={averageRating} />
                                     </div>
                                 </div>
                             </div>
@@ -469,7 +482,9 @@ export default function EditEvent({ userData }) {
                                         </div>
                                     </div>
 
+
                                     <div className="flex items-center space-x-2">
+                                        <SupplierModal className={'px-4 py-1 text-sm rounded-md'} supplierData={supplier} applications={applications} userData={userData.role} reviews={reviews} averageRating={averageRating} />  
                                         <button
                                             onClick={() => handleApprove(supplier.id)}
                                             className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"

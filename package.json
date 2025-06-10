@@ -15,7 +15,7 @@
     "@wojtekmaj/react-timerange-picker": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "core-js": "^3.42.0",
-    "firebase": "^11.6.1",
+    "firebase": "^11.9.0",
     "firebase-admin": "^13.4.0",
     "lucide-react": "^0.503.0",
     "moment": "^2.30.1",

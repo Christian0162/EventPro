@@ -7,6 +7,7 @@ import { db } from "./firebase/firebase";
 import Loading from "./components/Loading";
 import { HeadProvider } from "react-head";
 
+
 const GuestLayout = lazy(() => import("./layouts/GuestLayout"))
 const AuthLayout = lazy(() => import("./layouts/AuthLayout"))
 const HomePage = lazy(() => import("./pages/HomePage"))
