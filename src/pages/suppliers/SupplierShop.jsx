@@ -1,17 +1,15 @@
-import { MapPin, CircleCheckBig, Star, Mail, Phone, Clock7, CircleCheck, DollarSign, Edit3, X } from "lucide-react"
-import ShopCards from "../../components/ShopCards"
-import SupplierRegistration from "./SupplierRegistration"
+import { MapPin, CircleCheckBig, Star, Edit3, X } from "lucide-react"
 import { updateDoc, doc, getDocs, collection } from "firebase/firestore"
-import { db } from "../../firebase/firebase"
-import { auth } from "../../firebase/firebase"
+import { db, auth } from "../../firebase/firebase"
 import { useEffect, useState } from "react"
 import Loading from "../../components/Loading"
 import { Link } from "react-router-dom"
 import UploadWidget from "../../components/UploadWidgen"
 import { ShopBackgroundModal } from "../../components/ShopBackgroundModal"
+import SupplierRegistration from "./SupplierRegistration"
+import SupplierPanels from "../../components/SupplierPanels"
 
 export default function SupplierShop() {
-
     const [shop, setShop] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [reviews, setReviews] = useState([])
@@ -62,8 +60,6 @@ export default function SupplierShop() {
         ? (validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length).toFixed(1)
         : "N/A";
 
-
-    console.log(background)
     return (
         <>
             {isLoading && (
@@ -89,7 +85,6 @@ export default function SupplierShop() {
                                         onClick={() => setIsOpen(true)}
                                     >
                                         <Edit3 size={16} />
-
                                         Edit
                                     </button>
                                 )}
@@ -163,150 +158,12 @@ export default function SupplierShop() {
                                 </div>
                             </div>
 
-                            {/* Navigation Tabs */}
-                            <div className="border-b border-gray-200 mb-8">
-                                <div className="flex gap-1">
-                                    <button className="px-6 py-3 bg-blue-500 text-white rounded-t-lg font-medium shadow-sm">
-                                        About
-                                    </button>
-                                    <button className="px-6 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-t-lg font-medium transition-colors">
-                                        Services
-                                    </button>
-                                    <button className="px-6 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-t-lg font-medium transition-colors">
-                                        Reviews
-                                    </button>
-                                </div>
-                            </div>
+                            <SupplierPanels reviews={reviews} shop={shop} averageRating={averageRating}/>
 
-                            {/* Content Grid */}
-                            <div className="grid md:grid-cols-2 gap-8">
-                                {/* Description Card */}
-                                <ShopCards className="md:col-span-2">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-gray-900 mb-2">About Our Business</h3>
-                                            <p className="text-gray-600">{shop.supplier_description}</p>
-                                        </div>
-                                        <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md">
-                                            <Edit3 size={16} />
-                                            Edit
-                                        </button>
-                                    </div>
-
-                                    <p className="text-gray-700 leading-relaxed mb-6 text-lg">
-                                        Create stunning floral arrangements for weddings and events that leave lasting impressions.
-                                    </p>
-
-                                    <div>
-                                        <h4 className="font-bold text-gray-900 mb-3">Our Expertise</h4>
-                                        <div className="flex flex-wrap gap-3">
-                                            {shop?.supplier_expertise?.map((skill, index) => (
-                                                <span
-                                                    key={index}
-                                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${index === 0
-                                                        ? 'bg-blue-500 text-white shadow-sm'
-                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                        }`}
-                                                >
-                                                    {skill}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </ShopCards>
-
-                                {/* Contact Information */}
-                                <ShopCards>
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-gray-900 mb-2">Contact Information</h3>
-                                            <p className="text-gray-600">How customers can reach you</p>
-                                        </div>
-                                        <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md">
-                                            <Edit3 size={16} />
-                                            Edit
-                                        </button>
-                                    </div>
-
-                                    <div className="space-y-6">
-                                        <div className="flex items-start gap-4">
-                                            <div className="p-2 bg-blue-100 rounded-lg">
-                                                <Mail size={24} className="text-blue-600" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-gray-900 mb-1">Email Address</h4>
-                                                <p className="text-gray-600">{shop.supplier_email}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-start gap-4">
-                                            <div className="p-2 bg-green-100 rounded-lg">
-                                                <Phone size={24} className="text-green-600" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-gray-900 mb-1">Phone Number</h4>
-                                                <p className="text-gray-600">{shop.supplier_number}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </ShopCards>
-
-                                {/* Booking Information */}
-                                <ShopCards>
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-gray-900 mb-2">Booking Details</h3>
-                                            <p className="text-gray-600">Pricing and availability information</p>
-                                        </div>
-                                        <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md">
-                                            <Edit3 size={16} />
-                                            Edit
-                                        </button>
-                                    </div>
-
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-2 bg-green-100 rounded-lg">
-                                                <DollarSign size={24} className="text-green-600" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-gray-900 mb-1">Starting Price</h4>
-                                                <p className="text-xl font-bold text-green-600">₱{shop.supplier_price}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-2 bg-purple-100 rounded-lg">
-                                                <Clock7 size={24} className="text-purple-600" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-gray-900 mb-1">Availability</h4>
-                                                <p className="text-gray-600">{shop.supplier_availability}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-2 bg-blue-100 rounded-lg">
-                                                <CircleCheck size={24} className="text-blue-600" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-gray-900 mb-1">{shop.supplier_response_time?.label}</h4>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-gray-600">Within 24 Hours</span>
-                                                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
-                                                        Fast Response
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </ShopCards>
-                            </div>
                         </div>
                     </div>
                 </div>
-            )
-            }
+            )}
         </>
     )
 }

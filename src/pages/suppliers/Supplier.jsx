@@ -1,4 +1,4 @@
-import { Search, MapPin, DollarSign, Clock, Star, Filter } from "lucide-react";
+import { Search, MapPin, PhilippinePeso, Clock, Star, Bot } from "lucide-react";
 import { useEffect, useState } from "react";
 import Cards from "../../components/Cards";
 import Select from 'react-select';
@@ -6,6 +6,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import Loading from "../../components/Loading";
 import SupplierModal from "../../components/SupplierModal";
+import AIModal from "../../components/AIModal";
 
 export default function Supplier({ userData }) {
     const [category, setCategory] = useState(null);
@@ -60,15 +61,6 @@ export default function Supplier({ userData }) {
     useEffect(() => {
         let filtered = shop;
 
-        if (searchTerm) {
-            filtered = filtered.filter(shopItem =>
-                shopItem.supplier_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                shopItem.supplier_expertise?.some(expertise =>
-                    expertise.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-            );
-        }
-
         if (category) {
             filtered = filtered.filter(shopItem =>
                 shopItem.supplier_expertise?.includes(category.value)
@@ -99,6 +91,23 @@ export default function Supplier({ userData }) {
         setSearchTerm(e.target.value);
     };
 
+    const handleSearch = () => {
+
+        let filtered = shop
+
+        if (searchTerm) {
+            filtered = filtered.filter(shopItem =>
+                shopItem.supplier_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                shopItem.supplier_expertise?.some(expertise =>
+                    expertise.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+            );
+            setFilteredShops(filtered)
+
+        }
+
+    }
+
 
     console.log(filteredShops)
     return (
@@ -114,46 +123,40 @@ export default function Supplier({ userData }) {
                             Suppliers
                         </h1>
                     </div>
-                    <div className="hidden md:flex items-center space-x-4">
-                        <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
-                            <span className="text-sm text-gray-600">
-                                {filteredShops.length} suppliers found
-                            </span>
-                        </div>
+                    <div>
+                        <AIModal />
                     </div>
+
                 </div>
 
                 {/* Search and Filter Section */}
                 <div>
                     <div className="flex flex-col md:flex-row gap-4">
                         {/* Search Bar */}
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-4 top-[1.30rem] transform -translate-y-1/2 text-gray-400" size={20} />
-                            <input
-                                type="search"
-                                value={searchTerm}
-                                onChange={handleSearchChange}
-                                className="w-full pl-12 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white outline-none transition-all duration-200"
-                                placeholder="Search suppliers by name or service..."
-                            />
+                        <div className="flex w-full gap-3">
+                            <div className="flex w-[35rem] relative">
+                                <Search className="absolute left-4 top-[1.30rem] transform -translate-y-1/2 text-gray-400" size={20} />
+                                <input
+                                    type="search"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    className="w-full pl-12 pr-4 py-2 bg-gray-50 border shadow-lg border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white outline-none transition-all duration-200"
+                                    placeholder="Search suppliers by name or service..."
+                                />
+                            </div>
+                            <button onClick={() => handleSearch()} className="transition-all duration-100 bg-blue-600 px-6 py-2 text-white font-semibold rounded-full hover:bg-blue-700">Search</button>
+                            {/* Category Filter */}
                         </div>
 
-                        {/* Category Filter */}
-                        <div className="w-full md:w-72">
-                            <Select
-                                onChange={setCategory}
-                                value={category}
-                                options={categoriesOptions}
-                                placeholder="Category"
-                                isClearable
-                            />
-                        </div>
-
-                        {/* Filter Button */}
-                        <button className="flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors duration-200">
-                            <Filter size={20} />
-                            <span className="ml-2 hidden sm:inline">Filters</span>
-                        </button>
+                    </div>
+                    <div className="w-full md:w-72 mt-3 ml-auto">
+                        <Select
+                            onChange={setCategory}
+                            value={category}
+                            options={categoriesOptions}
+                            placeholder="Category"
+                            isClearable
+                        />
                     </div>
                 </div>
             </div>
@@ -206,8 +209,8 @@ export default function Supplier({ userData }) {
                                 {/* Price and Hours */}
                                 <div className="flex justify-between items-center mb-5">
                                     <div className="flex items-center space-x-1">
-                                        <DollarSign className="text-green-600" size={18} />
-                                        <span className="text-lg font-bold text-gray-900">₱{shopItem.supplier_price}</span>
+                                        <PhilippinePeso className="text-green-600" size={18} />
+                                        <span className="text-lg font-bold text-gray-900">{shopItem.supplier_price}</span>
                                         <span className="text-sm text-gray-500">/day</span>
                                     </div>
                                     <div className="flex items-center space-x-1">
@@ -237,7 +240,7 @@ export default function Supplier({ userData }) {
                                 </div>
 
                                 {/* Action Button */}
-                                <SupplierModal supplierData={shopItem} userData={userData.role} />
+                                <SupplierModal className={'py-2 rounded-lg font-semibold'} supplierData={shopItem} userData={userData.role} reviews={reviewCount} averageRating={averageRating} />
                             </div>
                         </Cards>
                     );
